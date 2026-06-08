@@ -1,0 +1,72 @@
+[
+  {
+    "id": "SETUP-000",
+    "category": "setup",
+    "title": "프로젝트 하네스 문서 초기화",
+    "description": "CLAUDE.md, AGENTS.md, HARNESS.md, CONVENTIONS.md, PRODUCT_BRIEF.md, claude-progress.txt, Codex-progress.txt, feature_list/ 폴더가 루트에 존재하고 내용이 올바른지 확인한다.",
+    "steps": [
+      "루트에 CLAUDE.md, AGENTS.md, HARNESS.md, CONVENTIONS.md, PRODUCT_BRIEF.md 파일 존재 확인",
+      "feature_list/ 폴더 존재 및 SETUP.json 파일 존재 확인",
+      "claude-progress.txt, Codex-progress.txt 파일 존재 확인",
+      ".gitignore에 .env.local 포함 여부 확인",
+      "git remote -v 에서 origin이 https://github.com/darcse/mybooks.git 인지 확인"
+    ],
+    "passes": true
+  },
+  {
+    "id": "SETUP-001",
+    "category": "setup",
+    "title": "Next.js 프로젝트 초기화 및 기본 설정",
+    "description": "create-next-app으로 Next.js 15 App Router 프로젝트를 생성하고 Tailwind v4, TypeScript, Inter 폰트(ss03), Raycast 디자인 토큰을 globals.css에 설정한다.",
+    "steps": [
+      "npm run dev 실행 후 localhost:3000 정상 접속 확인",
+      "body에 font-feature-settings 'ss03' 적용 여부 개발자도구에서 확인",
+      "globals.css에 --canvas, --surface, --hairline 등 Raycast CSS 토큰 정의 확인",
+      "배경색이 #07080a(canvas) 기준 다크로 렌더링되는지 확인",
+      "npm run build 에러 없이 통과 확인"
+    ],
+    "passes": true
+  },
+  {
+    "id": "SETUP-002",
+    "category": "setup",
+    "title": "Supabase 연결 및 Auth 구조 세팅",
+    "description": "Supabase 클라이언트(server/client), proxy.ts, useAuthState 훅을 구성하고 기존 Supabase 인스턴스에 정상 연결한다.",
+    "steps": [
+      "환경변수 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY 설정 후 빌드 통과 확인",
+      "/login 페이지에서 이메일/비밀번호 로그인 후 세션 유지 확인",
+      "로그인 상태에서 새로고침해도 로그인 상태 유지 확인",
+      "로그아웃 후 보호된 경로 접근 시 로그인 페이지로 리다이렉트 확인",
+      "잘못된 이메일/비밀번호 입력 시 에러 메시지 노출 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "SETUP-003",
+    "category": "setup",
+    "title": "레이아웃 및 네비게이션 구성",
+    "description": "Raycast 스타일 상단 네비게이션(Books, Comics, Photobook, Archive, 로그인/로그아웃), 모바일 햄버거 메뉴, Sonner toast provider를 레이아웃에 구성한다.",
+    "steps": [
+      "데스크탑에서 모든 네비게이션 링크 클릭 시 해당 페이지 이동 확인",
+      "네비게이션 배경이 --canvas(#07080a), 하단 1px --hairline(#242728) 테두리 확인",
+      "모바일 뷰포트에서 햄버거 메뉴 열기/닫기 확인",
+      "로그인 상태와 비로그인 상태에서 네비게이션 우측 액션 차이 확인",
+      "toast 성공/에러 각 1회 노출 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "SETUP-004",
+    "category": "setup",
+    "title": "Vercel 배포 및 커스텀 도메인 연결",
+    "description": "mybooks를 Vercel 프로젝트로 배포하고 books.sshlove.com 커스텀 도메인을 연결한다.",
+    "steps": [
+      "Vercel 프로젝트 생성 후 main 브랜치 push 시 자동 배포 확인",
+      "books.sshlove.com 접속 확인",
+      "HTTPS 인증서 정상 발급 확인",
+      "Vercel 환경변수 등록 후 프로덕션 빌드에서 Supabase 연결 확인",
+      "배포 후 로그인/로그아웃 정상 동작 확인"
+    ],
+    "passes": false
+  }
+]
