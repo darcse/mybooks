@@ -13,5 +13,20 @@
         "모든 페이지(/books, /comics, /photobook, /archive)에서 테마 일관성 확인"
       ],
       "passes": true
-    }
+    },
+    {
+        "id": "UX-002",
+        "category": "ux",
+        "title": "네비게이션 — 로고 사이즈·메뉴 hover/active 스타일",
+        "description": "mybooks 로고 폰트 사이즈를 키우고, 네비게이션 메뉴 아이템에 hover 스타일과 현재 페이지 selected 스타일을 적용한다.",
+        "steps": [
+          "로고 폰트 사이즈가 기존보다 크게 렌더링되는지 확인",
+          "메뉴 아이템에 마우스 오버 시 스타일 변경 확인",
+          "현재 페이지에 해당하는 메뉴 아이템에 selected 스타일 적용 확인",
+          "페이지 이동 시 selected 스타일이 해당 메뉴로 이동하는지 확인",
+          "라이트/다크 모드 양쪽에서 hover/selected 스타일 가독성 확인",
+          "모바일 햄버거 메뉴에도 동일한 selected 스타일 적용 확인"
+        ],
+        "passes": false
+      }
   ]

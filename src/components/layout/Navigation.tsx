@@ -20,6 +20,14 @@ const navItems = [
   { name: 'Archive', path: '/archive' },
 ];
 
+function navLinkClass(active: boolean, variant: 'desktop' | 'mobile') {
+  const base =
+    variant === 'desktop'
+      ? 'nav-menu-link rounded-sm px-3 py-1.5 text-sm font-medium'
+      : 'nav-menu-link rounded-sm px-3 py-3 text-[15px] font-medium';
+  return active ? `${base} nav-menu-link-selected` : base;
+}
+
 export function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
@@ -114,20 +122,18 @@ export function Navigation() {
         <div className="flex h-14 items-center justify-between gap-3">
           <Link
             href="/"
-            className="shrink-0 text-[17px] font-medium tracking-tight text-ink transition-opacity hover:opacity-80"
+            className="shrink-0 text-xl font-medium tracking-tight text-ink transition-opacity hover:opacity-80"
           >
             mybooks
           </Link>
 
           <div className="ml-10 hidden min-w-0 flex-1 items-center justify-between lg:flex">
-            <div className="flex flex-wrap gap-7 text-sm font-medium">
+            <div className="flex flex-wrap items-center gap-1">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.path}
-                  className={`whitespace-nowrap transition-colors ${
-                    isActive(item.path) ? 'text-ink' : 'text-body hover:text-ink'
-                  }`}
+                  className={`whitespace-nowrap ${navLinkClass(isActive(item.path), 'desktop')}`}
                 >
                   {item.name}
                 </Link>
@@ -176,11 +182,7 @@ export function Navigation() {
                   <Link
                     key={item.name}
                     href={item.path}
-                    className={`rounded-sm px-3 py-3 text-[15px] font-medium transition-colors ${
-                      isActive(item.path)
-                        ? 'bg-surface-elevated text-ink'
-                        : 'text-body hover:bg-surface-elevated hover:text-ink'
-                    }`}
+                    className={navLinkClass(isActive(item.path), 'mobile')}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.name}
