@@ -1,7 +1,12 @@
-export default function BooksPage() {
+'use client';
+
+import { Suspense } from 'react';
+import { BooksLibraryContent } from './_components/BooksLibraryContent';
+
+export default function BookLibraryPage() {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-medium text-ink">Books</h1>
-    </main>
+    <Suspense fallback={<div className="p-8 text-center text-mute">로딩 중...</div>}>
+      <BooksLibraryContent />
+    </Suspense>
   );
 }

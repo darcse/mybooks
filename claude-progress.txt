@@ -6,3 +6,5 @@
 [2026-06-08] [Cursor] SETUP-001 Inter 폰트(ss03), Raycast CSS 토큰, canvas 다크 배경 적용 | passes: 변경 없음
 [2026-06-08] [Cursor] SETUP-002 Supabase Auth (client/server, proxy, useAuthState, /login) | passes: 변경 없음
 [2026-06-08] [Cursor] SETUP-003 Raycast 네비게이션, 햄버거 메뉴, Sonner toast | passes: 변경 없음
+[2026-06-08] [Cursor] BOOK-001 도서 목록/필터/검색/정렬/페이지네이션 이관 | passes: 변경 없음
+[2026-06-08] [Cursor] BOOK-002 알라딘 검색 연동, 도서 등록/수정/삭제 | passes: 변경 없음
