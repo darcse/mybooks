@@ -40,3 +40,4 @@
 [2026-06-08] [Cursor] UX-005 후속 레이아웃(Summary 30/70·카테고리 2열·도넛 중앙·Timeless CSS Module) | passes: 변경 없음
 [2026-06-08] [Cursor] UX-005 후속2 Summary·Recent Picks 가로 배치 CSS Module(flex 30/70·33/33/33) | passes: 변경 없음
 [2026-06-08] [Cursor] UX-005 후속3 Summary 카드 동일 높이(292px)·카테고리 4열·max-height 스크롤 | passes: 변경 없음
+[2026-06-08] [Cursor] UX-006 네비 외부 앱 아이콘 링크 4개(Home·Headphones·PenLine·TrendingUp) | passes: 변경 없음

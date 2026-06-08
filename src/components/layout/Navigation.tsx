@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { LogIn, Menu, Monitor, Moon, Sun, X } from 'lucide-react';
+import { Headphones, Home, LogIn, Menu, Monitor, Moon, PenLine, Sun, TrendingUp, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
   getStoredThemeMode,
@@ -19,6 +19,16 @@ const navItems = [
   { name: 'Photobook', path: '/photobook' },
   { name: 'Archive', path: '/archive' },
 ];
+
+const externalAppLinks = [
+  { label: 'SSH Love 홈', href: 'https://sshlove.com', Icon: Home },
+  { label: 'Audio', href: 'https://audio.sshlove.com', Icon: Headphones },
+  { label: 'SSH Write', href: 'https://sshwrite.com', Icon: PenLine },
+  { label: 'My Stock', href: 'https://mystock-mu.vercel.app/stocks', Icon: TrendingUp },
+] as const;
+
+const externalLinkButtonClass =
+  'inline-flex h-9 w-9 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink';
 
 function navLinkClass(active: boolean, variant: 'desktop' | 'mobile') {
   const base =
@@ -92,9 +102,6 @@ export function Navigation() {
     router.refresh();
   }, [router]);
 
-  const isActive = (path: string) =>
-    pathname === path || (path !== '/' && pathname?.startsWith(path));
-
   const authAction = isAuthenticated !== null && (
     isAuthenticated ? (
       <button
@@ -114,6 +121,27 @@ export function Navigation() {
         <LogIn size={18} strokeWidth={2} />
       </Link>
     )
+  );
+
+  const isActive = (path: string) =>
+    pathname === path || (path !== '/' && pathname?.startsWith(path));
+
+  const externalAppLinkIcons = (
+    <div className="flex items-center gap-1">
+      {externalAppLinks.map(({ label, href, Icon }) => (
+        <a
+          key={href}
+          href={href}
+          target="_self"
+          rel="noopener noreferrer"
+          className={externalLinkButtonClass}
+          aria-label={label}
+          title={label}
+        >
+          <Icon size={16} strokeWidth={2} />
+        </a>
+      ))}
+    </div>
   );
 
   return (
@@ -140,12 +168,14 @@ export function Navigation() {
               ))}
             </div>
             <div className="flex shrink-0 items-center gap-2">
+              {externalAppLinkIcons}
               {themeToggle}
               {authAction}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-1 lg:hidden">
+            {externalAppLinkIcons}
             {themeToggle}
             {authAction}
             <button
@@ -188,6 +218,27 @@ export function Navigation() {
                     {item.name}
                   </Link>
                 ))}
+                <div className="mt-2 border-t border-hairline pt-3">
+                  <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
+                    앱
+                  </p>
+                  <div className="flex flex-wrap gap-1 px-3">
+                    {externalAppLinks.map(({ label, href, Icon }) => (
+                      <a
+                        key={href}
+                        href={href}
+                        target="_self"
+                        rel="noopener noreferrer"
+                        className={externalLinkButtonClass}
+                        aria-label={label}
+                        title={label}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Icon size={16} strokeWidth={2} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
                 <div className="mt-2 border-t border-hairline pt-3">
                   <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
                     테마
