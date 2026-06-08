@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Book as BookClosedIcon, BookCheck, BookOpen, List, X } from 'lucide-react';
+import Link from 'next/link';
+import { Book as BookClosedIcon, BookCheck, BookOpen, Highlighter, List, X } from 'lucide-react';
 import { formatAuthorName } from '@/lib/format';
 import { categoryOptions } from '../constants';
 import type { Book } from '../types';
@@ -36,6 +37,7 @@ interface BookListProps {
   listTotalPages: number;
   isAuthenticated: boolean | null;
   libraryEmpty?: boolean;
+  showHighlightsLink?: boolean;
   onItemClick?: (book: Book) => void;
 }
 
@@ -59,6 +61,7 @@ export function BookList({
   listTotalPages,
   isAuthenticated,
   libraryEmpty = false,
+  showHighlightsLink = false,
   onItemClick,
 }: BookListProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -95,10 +98,21 @@ export function BookList({
   return (
     <div className="mt-8 border-t border-hairline pt-8">
       <div className="mb-2 flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:gap-6">
-        <h2 className="flex shrink-0 items-center gap-2 text-lg font-medium text-ink">
-          <List className="size-5 shrink-0 text-mute" strokeWidth={1.5} />
-          소장 목록
-        </h2>
+        <div className="flex shrink-0 items-center gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-medium text-ink">
+            <List className="size-5 shrink-0 text-mute" strokeWidth={1.5} />
+            소장 목록
+          </h2>
+          {showHighlightsLink ? (
+            <Link
+              href="/books/highlights"
+              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-surface-elevated px-3 py-1.5 text-sm font-medium text-body hover:text-ink"
+            >
+              <Highlighter className="size-4" strokeWidth={1.5} />
+              하이라이트
+            </Link>
+          ) : null}
+        </div>
         <div className="flex w-full flex-col gap-2 lg:ml-auto lg:w-auto">
           <div className="flex items-center justify-between gap-2 lg:justify-end">
             <div className="relative min-w-[140px] flex-1 md:min-w-[170px] lg:w-[320px] lg:flex-none">

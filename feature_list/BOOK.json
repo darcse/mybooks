@@ -42,7 +42,7 @@
         "도서정보/하이라이트 탭 전환 확인",
         "모달 닫기 후 목록 stale state 없이 최신 데이터 유지 확인"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BOOK-004",
@@ -57,7 +57,7 @@
         "도서별·태그별 필터 적용 시 목록 변경 확인",
         "비로그인 상태에서 /books/highlights 접근 시 로그인 프롬프트 노출 확인"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BOOK-005",

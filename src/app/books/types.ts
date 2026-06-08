@@ -24,6 +24,17 @@ export interface Book {
   created_at?: string;
 }
 
+export interface BookHighlight {
+  id: number;
+  book_id: number;
+  user_id: string;
+  content: string;
+  tags: string[] | null;
+  created_at: string;
+  updated_at: string;
+  source_app: string | null;
+}
+
 export interface AladinSearchBookItem {
   title?: string;
   author?: string;

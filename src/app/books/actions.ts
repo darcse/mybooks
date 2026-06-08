@@ -2,6 +2,7 @@
 
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
 import { searchAladinBooks as searchAladinBooksLib, getAladinItemByIsbn } from '@/lib/aladin';
+import type { BookHighlight } from './types';
 
 export async function searchAladinBooks(query: string, page: number = 1, display: number = 15) {
   const { items, totalResults } = await searchAladinBooksLib(query, page, display);
@@ -96,6 +97,101 @@ export async function deleteBookFromDB(id: number) {
   if (!user) throw new Error('Unauthorized');
   const supabase = await createClient();
   const { error } = await supabase.from('books').delete().eq('id', id);
+  if (error) throw error;
+  return true;
+}
+
+export async function updateBookPartialInDB(
+  id: number,
+  fields: {
+    current_page?: number;
+    rank?: number;
+    memo?: string | null;
+  }
+) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('books')
+    .update(fields)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getBookHighlights(bookId: number) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('book_highlights')
+    .select('*')
+    .eq('book_id', bookId)
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data as BookHighlight[]) || [];
+}
+
+export async function createBookHighlight(bookId: number, content: string, tags: string[]) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('book_highlights')
+    .insert({
+      book_id: bookId,
+      user_id: user.id,
+      content,
+      tags,
+      source_app: 'mybooks',
+    })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data as BookHighlight;
+}
+
+export async function updateBookHighlight(
+  highlightId: number,
+  bookId: number,
+  content: string,
+  tags: string[]
+) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('book_highlights')
+    .update({
+      content,
+      tags,
+      updated_at: new Date().toISOString(),
+      source_app: 'mybooks',
+    })
+    .eq('id', highlightId)
+    .eq('book_id', bookId)
+    .eq('user_id', user.id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data as BookHighlight;
+}
+
+export async function deleteBookHighlight(highlightId: number, bookId: number) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('book_highlights')
+    .delete()
+    .eq('id', highlightId)
+    .eq('book_id', bookId)
+    .eq('user_id', user.id);
   if (error) throw error;
   return true;
 }

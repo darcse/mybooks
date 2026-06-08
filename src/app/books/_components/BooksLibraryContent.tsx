@@ -17,6 +17,7 @@ import {
 import { categoryOptions } from '../constants';
 import type { AladinSearchBookItem, Book, SelectedBook } from '../types';
 import { getOwnershipStatus } from '../utils';
+import { BookDetailModal } from './BookDetailModal';
 import { BookForm } from './BookForm';
 import { BookList } from './BookList';
 import { BookSearchSection } from './BookSearchSection';
@@ -94,6 +95,7 @@ export function BooksLibraryContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [library, setLibrary] = useState<Book[]>([]);
+  const [viewingBook, setViewingBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
@@ -270,14 +272,41 @@ export function BooksLibraryContent() {
     }
   };
 
-  const handleEditClick = (book: Book) => {
+  const handleEditFromModal = () => {
+    if (!viewingBook) return;
     if (!isAuthenticated) {
       toast.error('로그인이 필요합니다.');
       return;
     }
     clearEditParam();
-    setSelectedBook(book);
-    setFormData(bookToFormData(book));
+    setSelectedBook(viewingBook);
+    setFormData(bookToFormData(viewingBook));
+    setViewingBook(null);
+  };
+
+  const handleBookUpdated = (book: Book) => {
+    setViewingBook(book);
+    setLibrary((prev) => prev.map((b) => (b.id === book.id ? book : b)));
+  };
+
+  const handleDeleteFromModal = async () => {
+    if (!viewingBook) return;
+    if (!isAuthenticated) {
+      toast.error('로그인이 필요합니다.');
+      return;
+    }
+    if (!confirm('정말 이 도서를 라이브러리에서 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
+    setIsDeleting(true);
+    try {
+      await deleteBookFromDB(viewingBook.id);
+      toast.success('도서가 삭제되었습니다.');
+      setViewingBook(null);
+      fetchLibrary();
+    } catch (error) {
+      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleDeleteClick = async () => {
@@ -310,8 +339,12 @@ export function BooksLibraryContent() {
     setIsSaving(true);
     try {
       if ('id' in selectedBook && selectedBook.id) {
-        await updateBookInDB(Number(selectedBook.id), formData);
+        const updateId = Number(selectedBook.id);
+        await updateBookInDB(updateId, formData);
         toast.success('도서 정보가 성공적으로 수정되었습니다.');
+        const client = createClient();
+        const { data: updatedRow } = await client.from('books').select('*').eq('id', updateId).single();
+        if (updatedRow) setViewingBook(updatedRow as Book);
       } else {
         await saveBookToDB(formData);
         toast.success('도서가 라이브러리에 등록되었습니다.');
@@ -416,6 +449,18 @@ export function BooksLibraryContent() {
         />
       )}
 
+      {viewingBook && (
+        <BookDetailModal
+          viewingBook={viewingBook}
+          onClose={() => setViewingBook(null)}
+          onEdit={handleEditFromModal}
+          onDelete={handleDeleteFromModal}
+          onBookUpdated={handleBookUpdated}
+          isAuthenticated={isAuthenticated}
+          isDeleting={isDeleting}
+        />
+      )}
+
       {selectedBook && (
         <BookForm
           selectedBook={selectedBook}
@@ -456,16 +501,13 @@ export function BooksLibraryContent() {
           listTotalPages={listTotalPages}
           isAuthenticated={isAuthenticated}
           libraryEmpty={library.length === 0}
+          showHighlightsLink={isAuthenticated === true}
           onItemClick={(book) => {
             if (book.is_adult && !isAuthenticated) {
               toast.error('로그인 후 열람 가능한 도서입니다.');
               return;
             }
-            if (!isAuthenticated) {
-              toast.error('로그인이 필요합니다.');
-              return;
-            }
-            handleEditClick(book);
+            setViewingBook(book);
           }}
         />
       )}
