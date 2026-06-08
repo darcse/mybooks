@@ -4,16 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatAuthorName, formatComicAuthorName } from '@/lib/format';
+import { formatAuthorName } from '@/lib/format';
 import { useAuthState } from '@/hooks/useAuthState';
 import { createClient } from '@/lib/supabase/client';
 import type { MonthlyReviewTimeline } from '@/app/api/monthly-review-comment/route';
 import { BookDetailModal } from '@/app/books/_components/BookDetailModal';
-import { ComicsDetailModal } from '@/app/comics/_components/ComicsDetailModal';
 import { PhotobookDetailModal } from '@/app/photobook/_components/PhotobookDetailModal';
 import { ArchivePhotobookGrid } from '@/app/archive/[year]/[month]/_components/ArchivePhotobookGrid';
 import type { Book } from '@/app/books/types';
-import type { Comic } from '@/app/comics/types';
 import type { Photobook } from '@/app/photobook/types';
 
 function stripHtml(s: string): string {
@@ -37,8 +35,41 @@ function renderCommentLine(line: string, key: number) {
   );
 }
 
-function MonthlyCommentBody({ comment }: { comment: string }) {
+function trimCommentIntro(comment: string): string {
   const lines = comment.split('\n');
+  let start = 0;
+  if (/^\d{4}년\s*\d{1,2}월의\s*독서·컬렉션\s*활동을\s*보고합니다\.?\s*$/.test(lines[0]?.trim() ?? '')) {
+    start = 1;
+    while (start < lines.length && lines[start].trim() === '') start += 1;
+  }
+  return lines.slice(start).join('\n').trim();
+}
+
+function splitCommentForDisplay(comment: string): { titleLine: string | null; body: string } {
+  const trimmed = trimCommentIntro(comment);
+  const lines = trimmed.split('\n');
+  let start = 0;
+  let titleLine: string | null = null;
+  if (/^\*\*📚\s*.+\*\*\s*$/.test(lines[0]?.trim() ?? '')) {
+    titleLine = lines[0].trim();
+    start = 1;
+    while (start < lines.length && lines[start].trim() === '') start += 1;
+  }
+  return { titleLine, body: filterCommentBody(lines.slice(start).join('\n').trim()) };
+}
+
+function filterCommentBody(body: string): string {
+  return body
+    .split('\n')
+    .filter((line) => !/^-\s*\*\*코믹스:\*\*/.test(line.trim()))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function MonthlyCommentBody({ body }: { body: string }) {
+  if (!body) return null;
+  const lines = body.split('\n');
   return (
     <div className="space-y-3 text-[15px] leading-relaxed text-body sm:text-base">
       {lines.map((line, i) =>
@@ -78,7 +109,6 @@ export function MonthlyTimeline({ year, month }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [viewingBook, setViewingBook] = useState<Book | null>(null);
-  const [viewingComic, setViewingComic] = useState<Comic | null>(null);
   const [viewingPhotobook, setViewingPhotobook] = useState<Photobook | null>(null);
   const [sameModelOpen, setSameModelOpen] = useState(false);
 
@@ -108,8 +138,6 @@ export function MonthlyTimeline({ year, month }: Props) {
           const t = body.timeline;
           setTimeline({
             booksFinished: sortBooks(t.booksFinished),
-            booksPurchased: t.booksPurchased ?? [],
-            comics: sortByCreatedAt(t.comics),
             photobooks: sortByCreatedAt(t.photobooks),
           });
         } else {
@@ -142,15 +170,6 @@ export function MonthlyTimeline({ year, month }: Props) {
     setViewingBook(data as Book);
   };
 
-  const openComicById = async (id: number) => {
-    const { data, error } = await createClient().from('comics').select('*').eq('id', id).maybeSingle();
-    if (error || !data) {
-      toast.error('만화 정보를 불러오지 못했습니다.');
-      return;
-    }
-    setViewingComic(data as Comic);
-  };
-
   const openPhotobookById = async (id: number) => {
     const { data, error } = await createClient().from('photobook').select('*').eq('id', id).maybeSingle();
     if (error || !data) {
@@ -164,44 +183,58 @@ export function MonthlyTimeline({ year, month }: Props) {
   const t = timeline;
   const hasCommentActivity =
     t != null && t.booksFinished.length + t.photobooks.length > 0;
-  const hasAny =
-    t != null &&
-    t.booksFinished.length + t.booksPurchased.length + t.comics.length + t.photobooks.length > 0;
+  const hasAny = t != null && t.booksFinished.length + t.photobooks.length > 0;
 
   return (
     <div className="mt-6 flex flex-col gap-8">
       <div className="relative overflow-hidden rounded-lg border border-hairline bg-surface shadow-sm">
         <div className="absolute inset-y-0 left-0 w-1 bg-[var(--accent-blue)]" aria-hidden />
         <div className="p-5 pl-6 sm:p-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <span className="text-base font-semibold text-ink">이달의 활동</span>
-            {isAuthenticated === true ? (
-              <button
-                type="button"
-                onClick={() => void load({ refresh: true })}
-                disabled={busy || !hasCommentActivity}
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-sm text-mute hover:text-body disabled:pointer-events-none disabled:opacity-40"
-                aria-label="코멘트 새로고침"
-                title="코멘트 새로고침"
-              >
-                <RefreshCw className={`size-4 shrink-0 ${refreshing ? 'animate-spin' : ''}`} strokeWidth={1.75} />
-              </button>
-            ) : null}
-          </div>
-          <div>
-            {loading && !refreshing ? (
-              <p className="flex items-center gap-2 text-sm text-mute">
-                <Loader2 className="size-4 shrink-0 animate-spin" strokeWidth={2} aria-hidden />
-                불러오는 중…
-              </p>
-            ) : comment != null && comment.trim() !== '' ? (
-              <MonthlyCommentBody comment={comment} />
-            ) : !hasCommentActivity ? (
-              <p className="text-sm text-mute">이달 완독 도서·포토북 활동이 없어 코멘트가 없습니다.</p>
-            ) : (
-              <p className="text-sm text-mute">코멘트를 불러오지 못했습니다.</p>
-            )}
-          </div>
+          {loading && !refreshing ? (
+            <p className="flex items-center gap-2 text-sm text-mute">
+              <Loader2 className="size-4 shrink-0 animate-spin" strokeWidth={2} aria-hidden />
+              불러오는 중…
+            </p>
+          ) : comment != null && comment.trim() !== '' ? (
+            (() => {
+              const { titleLine, body } = splitCommentForDisplay(comment);
+              return (
+                <>
+                  {(titleLine || isAuthenticated === true) && (
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      {titleLine ? (
+                        <p className="min-w-0 flex-1 text-base font-semibold leading-snug text-ink">
+                          {renderCommentLine(titleLine, 0)}
+                        </p>
+                      ) : (
+                        <span className="flex-1" aria-hidden />
+                      )}
+                      {isAuthenticated === true ? (
+                        <button
+                          type="button"
+                          onClick={() => void load({ refresh: true })}
+                          disabled={busy || !hasCommentActivity}
+                          className="inline-flex size-9 shrink-0 items-center justify-center rounded-sm text-mute hover:text-body disabled:pointer-events-none disabled:opacity-40"
+                          aria-label="코멘트 새로고침"
+                          title="코멘트 새로고침"
+                        >
+                          <RefreshCw
+                            className={`size-4 shrink-0 ${refreshing ? 'animate-spin' : ''}`}
+                            strokeWidth={1.75}
+                          />
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
+                  <MonthlyCommentBody body={body} />
+                </>
+              );
+            })()
+          ) : !hasCommentActivity ? (
+            <p className="text-sm text-mute">이달 완독 도서·포토북 활동이 없어 코멘트가 없습니다.</p>
+          ) : (
+            <p className="text-sm text-mute">코멘트를 불러오지 못했습니다.</p>
+          )}
         </div>
       </div>
 
@@ -263,45 +296,6 @@ export function MonthlyTimeline({ year, month }: Props) {
                 </div>
               </section>
             )}
-            {t.comics.length > 0 && (
-              <section>
-                <h2 className={sectionTitleClass}>📖 코믹스</h2>
-                <div className={bookGridClass}>
-                  {t.comics.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => void openComicById(c.id)}
-                      className="flex gap-4 rounded-sm border border-hairline bg-surface p-4 text-left transition-colors hover:bg-surface-elevated"
-                    >
-                      <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-sm border border-hairline">
-                        {c.cover_image_url ? (
-                          <img
-                            src={c.cover_image_url}
-                            alt="표지"
-                            className="block h-full w-full object-cover object-top"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-surface-card text-xs text-mute">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1 overflow-hidden pt-1">
-                        <h3 className="truncate text-sm font-medium text-ink">{stripHtml(c.title)}</h3>
-                        <p className="mb-2 truncate text-xs text-mute">{formatComicAuthorName(c.author)}</p>
-                        <span className="inline-block rounded-sm bg-surface-elevated px-2 py-0.5 text-xs text-body">
-                          {c.category ?? '—'}
-                        </span>
-                        <p className="mt-2 text-xs tabular-nums text-mute">
-                          등록 {new Date(c.created_at).toLocaleDateString('ko-KR')}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
             {t.photobooks.length > 0 && (
               <section className="mt-10 pt-6">
                 <h2 className="mb-5 text-base font-medium text-ink">📷 포토북</h2>
@@ -325,20 +319,6 @@ export function MonthlyTimeline({ year, month }: Props) {
             router.push(`/books?edit=${id}`);
           }}
           onDelete={() => toast.info('삭제는 도서 화면에서 진행해 주세요.')}
-          isAuthenticated={isAuthenticated}
-        />
-      )}
-
-      {viewingComic && (
-        <ComicsDetailModal
-          viewingComic={viewingComic}
-          onClose={() => setViewingComic(null)}
-          onEdit={() => {
-            const id = viewingComic.id;
-            setViewingComic(null);
-            router.push(`/comics?view=${id}`);
-          }}
-          onDelete={() => toast.info('삭제는 만화 화면에서 진행해 주세요.')}
           isAuthenticated={isAuthenticated}
         />
       )}

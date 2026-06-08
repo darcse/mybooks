@@ -7,9 +7,9 @@ type Props = {
 };
 
 function MonthCollage({ urls }: { urls: string[] }) {
-  const slots = Array.from({ length: 6 }, (_, i) => urls[i] ?? null);
+  const slots = Array.from({ length: 2 }, (_, i) => urls[i] ?? null);
   return (
-    <div className="mb-3 grid aspect-[3/2] w-full grid-cols-3 gap-1">
+    <div className="mb-3 grid aspect-[2/1] w-full grid-cols-2 gap-1">
       {slots.map((url, i) => (
         <div
           key={i}
@@ -31,7 +31,8 @@ function MonthCollage({ urls }: { urls: string[] }) {
 }
 
 function formatMonthStats(row: ArchiveMonthCard) {
-  return `완독 ${row.booksFinished} · 코믹스 ${row.comics} · 포토북 ${row.photobooks}`;
+  const total = row.booksFinished + row.photobooks;
+  return `완독 ${row.booksFinished} · 포토북 ${row.photobooks} · 총 ${total}건`;
 }
 
 export function ArchiveGrid({ year, months }: Props) {
@@ -42,9 +43,7 @@ export function ArchiveGrid({ year, months }: Props) {
   }
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {months.map((row) => {
-        const total = row.booksFinished + row.comics + row.photobooks;
-        return (
+      {months.map((row) => (
           <Link
             key={row.month}
             href={`/archive/${year}/${row.month}`}
@@ -55,10 +54,8 @@ export function ArchiveGrid({ year, months }: Props) {
               {year}년 {row.month}월
             </h2>
             <p className="mt-1 text-xs tabular-nums text-mute">{formatMonthStats(row)}</p>
-            <p className="mt-0.5 text-xs tabular-nums text-mute">총 {total}건</p>
           </Link>
-        );
-      })}
+        ))}
     </div>
   );
 }

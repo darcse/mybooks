@@ -2,22 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
 import { generateMonthlyReviewComment } from '@/lib/gemini';
 
+const MONTHLY_REVIEW_APP = 'mybooks';
+
 const MONTHLY_REVIEW_SYSTEM_INSTRUCTION = `너는 mybooks 앱의 개인 독서·컬렉션 큐레이터야.
 
-제공된 활동 데이터에 없는 항목은 추측하거나 만들어내지 마. 코믹스·구매 도서·음악·오디오 관련 내용은 절대 언급하지 마.
+제공된 활동 데이터에 없는 항목은 추측하거나 만들어내지 마. 코믹스·음악·오디오 관련 내용은 절대 언급하지 마.
 
 아래 데이터만 근거로 한국어 월간 리포트를 작성해줘:
 - 완독 도서
 - 등록 포토북
 
 출력 형식(마크다운 **굵게** 사용):
-1) 첫 줄: "{year}년 {month}월의 독서·컬렉션 활동을 보고합니다."
+1) "**📚 {month}월 독서·컬렉션 리포트**"
 2) 빈 줄
-3) "**📚 {month}월 독서·컬렉션 리포트**"
+3) 2~3문장 서술 — 실제 제목·작가(모델)를 구체적으로 언급하고, 이달의 독서·컬렉션 성향과 장르 패턴을 분석
 4) 빈 줄
-5) 2~3문장 서술 — 실제 제목·작가(모델)를 구체적으로 언급하고, 이달의 독서·컬렉션 성향과 장르 패턴을 분석
-6) 빈 줄
-7) 해당 데이터가 있을 때만 bullet:
+5) 해당 데이터가 있을 때만 bullet:
 - **도서:** (완독 목록을 한 줄로 요약)
 - **포토북:** (등록 목록을 한 줄로 요약)
 
@@ -32,21 +32,6 @@ export type MonthlyReviewTimeline = {
     cover_image_url: string | null;
     category: string | null;
     memo: string | null;
-  }[];
-  booksPurchased: {
-    id: number;
-    title: string;
-    author: string | null;
-    purchase_date: string;
-    category: string | null;
-  }[];
-  comics: {
-    id: number;
-    title: string;
-    author: string | null;
-    created_at: string;
-    cover_image_url: string | null;
-    category: string | null;
   }[];
   photobooks: {
     id: number;
@@ -79,10 +64,7 @@ function stripHtml(s: string): string {
 }
 
 function buildUserPrompt(year: number, month: number, t: MonthlyReviewTimeline): string {
-  const blocks: string[] = [
-    `${year}년 ${month}월 mybooks 활동 (완독 도서·포토북만):`,
-    '',
-  ];
+  const blocks: string[] = [`${year}년 ${month}월 mybooks 활동 (완독 도서·포토북만):`, ''];
   if (t.booksFinished.length) {
     blocks.push(
       `📚 완독 도서: ${t.booksFinished.map((b) => `${stripHtml(b.title)} - ${(b.author ?? '').trim()}`).join(', ')}`,
@@ -106,7 +88,7 @@ async function loadTimeline(
   month: number,
 ): Promise<MonthlyReviewTimeline> {
   const { startIso, endExclusiveIso } = monthUtcIsoRange(year, month);
-  const [booksFinishedRes, booksPurchasedRes, comicsRes, photobookRes] = await Promise.all([
+  const [booksFinishedRes, photobookRes] = await Promise.all([
     supabase
       .from('books')
       .select('id,title,author,finished_at,status,cover_image_url,category,memo')
@@ -115,31 +97,16 @@ async function loadTimeline(
       .gte('finished_at', startIso)
       .lt('finished_at', endExclusiveIso),
     supabase
-      .from('books')
-      .select('id,title,author,purchase_date,category')
-      .not('purchase_date', 'is', null)
-      .gte('purchase_date', startIso)
-      .lt('purchase_date', endExclusiveIso),
-    supabase
-      .from('comics')
-      .select('id,title,author,cover_image_url,category,created_at')
-      .gte('created_at', startIso)
-      .lt('created_at', endExclusiveIso),
-    supabase
       .from('photobook')
       .select('id,title,author,cover_image_url,category,created_at')
       .gte('created_at', startIso)
       .lt('created_at', endExclusiveIso),
   ]);
   if (booksFinishedRes.error) throw new Error(booksFinishedRes.error.message);
-  if (booksPurchasedRes.error) throw new Error(booksPurchasedRes.error.message);
-  if (comicsRes.error) throw new Error(comicsRes.error.message);
   if (photobookRes.error) throw new Error(photobookRes.error.message);
 
   return {
     booksFinished: (booksFinishedRes.data ?? []) as MonthlyReviewTimeline['booksFinished'],
-    booksPurchased: (booksPurchasedRes.data ?? []) as MonthlyReviewTimeline['booksPurchased'],
-    comics: (comicsRes.data ?? []) as MonthlyReviewTimeline['comics'],
     photobooks: (photobookRes.data ?? []) as MonthlyReviewTimeline['photobooks'],
   };
 }
@@ -169,6 +136,7 @@ export async function GET(req: NextRequest) {
       const { data: cached, error: cErr } = await supabase
         .from('monthly_review_comments')
         .select('comment')
+        .eq('app', MONTHLY_REVIEW_APP)
         .eq('year', y)
         .eq('month', m)
         .maybeSingle();
@@ -196,12 +164,13 @@ export async function GET(req: NextRequest) {
         }
         const { error: upErr } = await supabase.from('monthly_review_comments').upsert(
           {
+            app: MONTHLY_REVIEW_APP,
             year: y,
             month: m,
             comment: generated,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: 'year,month' },
+          { onConflict: 'year,month,app' },
         );
         if (upErr) {
           return NextResponse.json({ error: upErr.message }, { status: 500 });
