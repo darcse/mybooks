@@ -3,8 +3,14 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { LogIn, Menu, X } from 'lucide-react';
+import { LogIn, Menu, Monitor, Moon, Sun, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import {
+  getStoredThemeMode,
+  nextThemeMode,
+  persistThemeMode,
+  type ThemeMode,
+} from '@/lib/theme';
 import { useAuthState } from '@/hooks/useAuthState';
 
 const navItems = [
@@ -19,6 +25,45 @@ export function Navigation() {
   const router = useRouter();
   const isAuthenticated = useAuthState();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>('auto');
+
+  useEffect(() => {
+    const initial = getStoredThemeMode();
+    setThemeMode(initial);
+    persistThemeMode(initial);
+  }, []);
+
+  const handleThemeToggle = useCallback(() => {
+    const next = nextThemeMode(themeMode);
+    setThemeMode(next);
+    persistThemeMode(next);
+  }, [themeMode]);
+
+  const themeToggle = (
+    <button
+      type="button"
+      onClick={handleThemeToggle}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink"
+      aria-label={
+        themeMode === 'light'
+          ? '라이트 모드 (클릭 시 다크 모드)'
+          : themeMode === 'dark'
+            ? '다크 모드 (클릭 시 자동 모드)'
+            : '자동 모드 (클릭 시 라이트 모드)'
+      }
+      title={
+        themeMode === 'light' ? '라이트' : themeMode === 'dark' ? '다크' : '자동'
+      }
+    >
+      {themeMode === 'light' ? (
+        <Sun size={16} strokeWidth={2} />
+      ) : themeMode === 'dark' ? (
+        <Moon size={16} strokeWidth={2} />
+      ) : (
+        <Monitor size={16} strokeWidth={2} />
+      )}
+    </button>
+  );
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -88,10 +133,14 @@ export function Navigation() {
                 </Link>
               ))}
             </div>
-            <div className="flex shrink-0 items-center">{authAction}</div>
+            <div className="flex shrink-0 items-center gap-2">
+              {themeToggle}
+              {authAction}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
+            {themeToggle}
             {authAction}
             <button
               type="button"
@@ -137,6 +186,29 @@ export function Navigation() {
                     {item.name}
                   </Link>
                 ))}
+                <div className="mt-2 border-t border-hairline pt-3">
+                  <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
+                    테마
+                  </p>
+                  <div className="px-3">
+                    <button
+                      type="button"
+                      onClick={handleThemeToggle}
+                      className="flex w-full items-center gap-3 rounded-sm px-3 py-3 text-[15px] font-medium text-body transition-colors hover:bg-surface-elevated hover:text-ink"
+                    >
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-hairline">
+                        {themeMode === 'light' ? (
+                          <Sun size={16} strokeWidth={2} />
+                        ) : themeMode === 'dark' ? (
+                          <Moon size={16} strokeWidth={2} />
+                        ) : (
+                          <Monitor size={16} strokeWidth={2} />
+                        )}
+                      </span>
+                      {themeMode === 'light' ? '라이트' : themeMode === 'dark' ? '다크' : '자동'}
+                    </button>
+                  </div>
+                </div>
                 <div className="mt-2 border-t border-hairline pt-3">
                   <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
                     계정

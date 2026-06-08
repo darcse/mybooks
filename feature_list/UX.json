@@ -1,0 +1,17 @@
+[
+    {
+      "id": "UX-001",
+      "category": "ux",
+      "title": "라이트/다크/자동 테마 토글",
+      "description": "Raycast 다크 토큰과 mylibrary 라이트 토큰을 기반으로 라이트/다크/자동 3가지 테마를 지원하고, localStorage theme-mode로 유지한다.",
+      "steps": [
+        "네비게이션 테마 토글 버튼 클릭 시 라이트/다크/자동 순서로 전환 확인",
+        "라이트 모드에서 배경·텍스트·카드 색상이 가독성 있게 변경되는지 확인",
+        "다크 모드에서 Raycast 팔레트(#07080a canvas 등) 적용 확인",
+        "자동 모드에서 시스템 설정 따라가는지 확인",
+        "페이지 새로고침 후 선택한 테마 유지 확인",
+        "모든 페이지(/books, /comics, /photobook, /archive)에서 테마 일관성 확인"
+      ],
+      "passes": true
+    }
+  ]

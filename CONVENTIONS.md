@@ -141,8 +141,7 @@ ALADIN_TTB_KEY=
 
 ## 디자인 시스템 — Raycast Style
 
-mybooks는 Raycast 마케팅 사이트 디자인 언어를 적용한다.
-**다크 전용** — 라이트/자동 테마 없음. 테마 토글 UI 구현하지 않는다.
+mybooks는 Raycast 마케팅 사이트 디자인 언어를 기반으로 하되, 라이트/다크/자동 테마 토글을 지원한다.
 상세 토큰·컴포넌트·반응형 규칙은 루트의 **DESIGN.md** 를 우선 참조한다.
 
 ### 색상 토큰
@@ -167,7 +166,13 @@ mybooks는 Raycast 마케팅 사이트 디자인 언어를 적용한다.
 --accent-yellow:   #ffc533;
 ```
 
-### 적용 규칙
+### 테마
+
+- 라이트/다크/자동 3가지 모드 지원
+- `localStorage`의 `theme-mode` 값으로 관리 (`light` / `dark` / `auto`)
+- 다크 토큰: Raycast 팔레트 그대로 사용
+- 라이트 토큰: mylibrary 라이트 모드 기준으로 정의
+- `<html>` 태그에 `data-theme` 또는 `class="dark"` 방식으로 적용
 
 - **elevation은 배경색으로만** — drop shadow 절대 사용 금지
   - 페이지 배경: `--canvas`

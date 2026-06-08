@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Toaster } from "sonner";
 import { Navigation } from "@/components/layout/Navigation";
+import { ThemeAwareToaster } from "@/components/layout/ThemeAwareToaster";
 import "./globals.css";
 
 const inter = Inter({
@@ -20,11 +20,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=localStorage.getItem('theme-mode');var r=document.documentElement;r.classList.remove('theme-light','theme-dark');if(m==='light')r.classList.add('theme-light');else if(m==='dark')r.classList.add('theme-dark');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} min-h-screen font-sans antialiased`}>
         <Navigation />
         {children}
-        <Toaster position="top-center" theme="dark" closeButton />
+        <ThemeAwareToaster />
       </body>
     </html>
   );

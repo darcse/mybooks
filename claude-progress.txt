@@ -12,3 +12,4 @@
 [2026-06-08] [Cursor] BOOK-004 도서 하이라이트 CRUD(상세 모달 탭, /books/highlights 모아보기·필터, 로그인 프롬프트) | passes: 변경 없음
 [2026-06-08] [Cursor] BOOK-005 독서 통계 모달(연도별 완독·카테고리 분포·Gemini 코멘트 캐싱) | passes: 변경 없음
 [2026-06-08] [Cursor] BOOK-006 AI 도서 추천(완독 이력 기반, 보유 미독서·외부 도서 1권) | passes: 변경 없음
+[2026-06-08] [Cursor] UX-001 라이트/다크/자동 테마 토글(localStorage theme-mode, Raycast 다크·mylibrary 라이트 토큰) | passes: 변경 없음
