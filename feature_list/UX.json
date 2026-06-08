@@ -27,6 +27,36 @@
           "라이트/다크 모드 양쪽에서 hover/selected 스타일 가독성 확인",
           "모바일 햄버거 메뉴에도 동일한 selected 스타일 적용 확인"
         ],
-        "passes": false
+        "passes": true
+      },
+      {
+        "id": "UX-003",
+        "category": "ux",
+        "title": "Archive 이관 — 연도별 월 카드 그리드",
+        "description": "mylibrary의 Archive 페이지를 mybooks로 이관한다. 로그인 전용, 완독 도서·코믹스·포토북 기준 월별 집계, 연도별 월 카드 그리드가 동작해야 한다.",
+        "steps": [
+          "/archive 페이지 진입 후 연도별 월 카드 그리드 정상 로드 확인",
+          "비로그인 상태에서 /archive 접근 시 로그인 프롬프트 노출 확인",
+          "월 카드에 완독 도서·코믹스·포토북 집계 수치 표시 확인",
+          "album·headfi·lyrics 관련 집계는 표시되지 않는지 확인",
+          "월 카드 클릭 시 /archive/[year]/[month] 이동 확인",
+          "활동이 없는 월 카드 빈 상태 처리 확인"
+        ],
+        "passes": true
+      },
+      {
+        "id": "UX-004",
+        "category": "ux",
+        "title": "Archive 월별 상세 타임라인",
+        "description": "Archive 월별 상세 페이지에서 해당 월의 완독 도서·코믹스·포토북 타임라인과 Gemini 월간 코멘트가 표시된다.",
+        "steps": [
+          "/archive/[year]/[month] 진입 후 타임라인 정상 로드 확인",
+          "완독 도서·코믹스·포토북 항목만 타임라인에 표시 확인",
+          "각 항목 클릭 시 해당 도메인 상세 모달 직오픈 확인",
+          "Gemini 월간 코멘트 생성 버튼 클릭 시 응답 노출 확인",
+          "생성된 코멘트 monthly_review_comments에 캐싱되어 재진입 시 즉시 표시 확인",
+          "해당 월 활동이 없을 때 빈 상태 메시지 노출 확인"
+        ],
+        "passes": true
       }
   ]

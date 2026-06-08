@@ -3,3 +3,4 @@
 ---
 
 [2026-06-08] [Init] 프로젝트 하네스 문서 초기화
+[2026-06-08] [Cursor] HARNESS dev/build 동시 실행 금지 규칙 추가(일반 작업 dev 유지, build 시 dev 중지→재시작) | passes: 변경 없음
