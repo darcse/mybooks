@@ -16,3 +16,6 @@
 [2026-06-08] [Cursor] COMICS-001 코믹스 목록/카테고리·상태 필터/검색/페이지네이션 이관 | passes: 변경 없음
 [2026-06-08] [Cursor] COMICS-002 알라딘 검색 연동, 코믹스 등록/수정/삭제(ComicsForm, server actions, 로그인 차단) | passes: 변경 없음
 [2026-06-08] [Cursor] COMICS-003 코믹스 상세 모달(진행도·메모 저장, onComicUpdated로 목록 stale 방지, 로그인 차단) | passes: 변경 없음
+[2026-06-08] [Cursor] PHOTO-001 포토북 목록/카테고리·별점 필터/검색/동일 모델 그룹/로그인 프롬프트 이관 | passes: 변경 없음
+[2026-06-08] [Cursor] PHOTO-002 알라딘 검색 연동, 포토북 등록/수정/삭제(PhotobookForm, server actions) | passes: 변경 없음
+[2026-06-08] [Cursor] PHOTO-003 포토북 상세 모달(별점·메모·방출 상태 저장, SameModelPhotobooks, stale 방지) | passes: 변경 없음
