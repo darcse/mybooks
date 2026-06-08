@@ -1,6 +1,8 @@
 'use client';
 
-import { DeletingLabel, SavingLabel } from '@/components/AsyncMutationUi';
+import { useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
+import { InlineSpinner, SavingLabel } from '@/components/AsyncMutationUi';
 import { categoryOptions, formatOptions, statusOptions } from '../constants';
 import type { SelectedPhotobook } from '../types';
 
@@ -54,6 +56,13 @@ export function PhotobookForm({
   isDeleting = false,
 }: PhotobookFormProps) {
   const isEditing = 'id' in selectedPhotobook && !!selectedPhotobook.id;
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const renderInput = (
     label: string,
@@ -213,10 +222,12 @@ export function PhotobookForm({
             />
           </div>
         </div>
-        <div className="mt-8 flex flex-col gap-3">
+        <div className="mt-8 flex gap-3">
           <button
             type="button"
-            className="w-full rounded-full bg-primary p-4 text-base font-medium text-on-primary disabled:cursor-not-allowed disabled:opacity-60"
+            className={`rounded-full bg-primary p-4 text-base font-medium text-on-primary disabled:cursor-not-allowed disabled:opacity-60 ${
+              isEditing && onDelete ? 'flex-[9]' : 'w-full'
+            }`}
             onClick={onSave}
             disabled={isSaving || isDeleting}
             aria-busy={isSaving}
@@ -232,12 +243,14 @@ export function PhotobookForm({
           {isEditing && onDelete && (
             <button
               type="button"
-              className="w-full rounded-md border border-hairline bg-surface-elevated p-3 text-sm font-medium text-body hover:text-ink disabled:opacity-60"
+              className="flex flex-[1] items-center justify-center rounded-full border border-hairline bg-surface-elevated text-body hover:text-ink disabled:opacity-60"
               onClick={onDelete}
               disabled={isSaving || isDeleting}
+              aria-label="사진집 삭제"
+              title="삭제"
               aria-busy={isDeleting}
             >
-              {isDeleting ? <DeletingLabel /> : '사진집 삭제'}
+              {isDeleting ? <InlineSpinner /> : <Trash2 className="size-4" strokeWidth={1.8} />}
             </button>
           )}
         </div>

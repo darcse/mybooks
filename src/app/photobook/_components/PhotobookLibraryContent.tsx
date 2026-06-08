@@ -265,11 +265,6 @@ export function PhotobookLibraryContent() {
     setViewingPhotobook(null);
   };
 
-  const handlePhotobookUpdated = (book: Photobook) => {
-    setViewingPhotobook(book);
-    setLibrary((prev) => prev.map((b) => (b.id === book.id ? book : b)));
-  };
-
   const handleDeleteFromModal = async () => {
     if (!viewingPhotobook) return;
     if (!isAuthenticated) {
@@ -478,7 +473,6 @@ export function PhotobookLibraryContent() {
           onClose={() => setViewingPhotobook(null)}
           onEdit={handleEditFromModal}
           onDelete={handleDeleteFromModal}
-          onPhotobookUpdated={handlePhotobookUpdated}
           isAuthenticated={isAuthenticated}
           isDeleting={isDeleting}
         />

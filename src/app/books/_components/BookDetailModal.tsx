@@ -1,16 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Bookmark, FileText } from 'lucide-react';
+import { BookOpen, Bookmark, FileText, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { DeletingLabel, SavingLabel } from '@/components/AsyncMutationUi';
+import { InlineSpinner, SavingLabel } from '@/components/AsyncMutationUi';
 import { formatAuthorName } from '@/lib/format';
 import {
   createBookHighlight,
   deleteBookHighlight,
   getBookHighlights,
   updateBookHighlight,
-  updateBookPartialInDB,
 } from '../actions';
 import type { Book, BookHighlight } from '../types';
 import { getOwnershipStatus } from '../utils';
@@ -20,7 +19,6 @@ interface BookDetailModalProps {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onBookUpdated: (book: Book) => void;
   isAuthenticated: boolean | null;
   isDeleting?: boolean;
   onHighlightChange?: (bookId: number) => void | Promise<void>;
@@ -63,7 +61,6 @@ export function BookDetailModal({
   onClose,
   onEdit,
   onDelete,
-  onBookUpdated,
   isAuthenticated,
   isDeleting = false,
   onHighlightChange,
@@ -76,12 +73,6 @@ export function BookDetailModal({
   const [highlightContent, setHighlightContent] = useState('');
   const [highlightTagInput, setHighlightTagInput] = useState('');
   const [highlightTags, setHighlightTags] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(String(viewingBook.current_page ?? 0));
-  const [rank, setRank] = useState(viewingBook.rank ?? 0);
-  const [memo, setMemo] = useState(viewingBook.memo ?? '');
-  const [isSavingProgress, setIsSavingProgress] = useState(false);
-  const [isSavingRank, setIsSavingRank] = useState(false);
-  const [isSavingMemo, setIsSavingMemo] = useState(false);
 
   const sortedHighlights = useMemo(
     () =>
@@ -199,9 +190,6 @@ export function BookDetailModal({
 
   useEffect(() => {
     setActiveTab('info');
-    setCurrentPage(String(viewingBook.current_page ?? 0));
-    setRank(viewingBook.rank ?? 0);
-    setMemo(viewingBook.memo ?? '');
     resetHighlightForm();
     setHighlights([]);
   }, [viewingBook]);
@@ -210,59 +198,6 @@ export function BookDetailModal({
     if (activeTab !== 'highlight') return;
     fetchHighlights();
   }, [activeTab, viewingBook?.id, isAuthenticated]);
-
-  const handleSaveProgress = async () => {
-    if (!isAuthenticated) {
-      toast.error('로그인이 필요합니다.');
-      return;
-    }
-    setIsSavingProgress(true);
-    try {
-      const updated = await updateBookPartialInDB(viewingBook.id, {
-        current_page: parseInt(currentPage) || 0,
-      });
-      onBookUpdated(updated as Book);
-      toast.success('진행도가 저장되었습니다.');
-    } catch (error) {
-      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSavingProgress(false);
-    }
-  };
-
-  const handleSaveRank = async () => {
-    if (!isAuthenticated) {
-      toast.error('로그인이 필요합니다.');
-      return;
-    }
-    setIsSavingRank(true);
-    try {
-      const updated = await updateBookPartialInDB(viewingBook.id, { rank });
-      onBookUpdated(updated as Book);
-      toast.success('별점이 저장되었습니다.');
-    } catch (error) {
-      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSavingRank(false);
-    }
-  };
-
-  const handleSaveMemo = async () => {
-    if (!isAuthenticated) {
-      toast.error('로그인이 필요합니다.');
-      return;
-    }
-    setIsSavingMemo(true);
-    try {
-      const updated = await updateBookPartialInDB(viewingBook.id, { memo: memo.trim() || null });
-      onBookUpdated(updated as Book);
-      toast.success('메모가 저장되었습니다.');
-    } catch (error) {
-      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSavingMemo(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -372,90 +307,15 @@ export function BookDetailModal({
               <p>
                 <strong className="text-ink">구입일:</strong> {viewingBook.purchase_date || '-'}
               </p>
+              <p>
+                <strong className="text-ink">별점:</strong>{' '}
+                {viewingBook.rank > 0 ? '⭐'.repeat(viewingBook.rank) : '미평가'}
+              </p>
+              <p>
+                <strong className="text-ink">독서 진행:</strong> {viewingBook.current_page} /{' '}
+                {viewingBook.total_pages}p
+              </p>
             </div>
-            {isAuthenticated && (
-              <div className="mb-6 space-y-4 border-t border-hairline pt-6">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-mute">
-                    독서 진행 ({viewingBook.total_pages}p)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      max={viewingBook.total_pages || undefined}
-                      className={inputClass}
-                      value={currentPage}
-                      onChange={(e) => setCurrentPage(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSaveProgress}
-                      disabled={isSavingProgress}
-                      className="shrink-0 rounded-md border border-hairline bg-surface-elevated px-4 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
-                    >
-                      {isSavingProgress ? <SavingLabel text="저장 중..." /> : '저장'}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-mute">별점</label>
-                  <div className="flex gap-2">
-                    <select
-                      className={inputClass}
-                      value={rank}
-                      onChange={(e) => setRank(parseInt(e.target.value))}
-                    >
-                      <option value={0}>미평가</option>
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <option key={num} value={num}>
-                          {num}점
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={handleSaveRank}
-                      disabled={isSavingRank}
-                      className="shrink-0 rounded-md border border-hairline bg-surface-elevated px-4 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
-                    >
-                      {isSavingRank ? <SavingLabel text="저장 중..." /> : '저장'}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-mute">메모</label>
-                  <textarea
-                    className={textareaClass}
-                    value={memo}
-                    onChange={(e) => setMemo(e.target.value)}
-                    placeholder="메모를 입력하세요"
-                  />
-                  <div className="mt-2 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleSaveMemo}
-                      disabled={isSavingMemo}
-                      className="rounded-md border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
-                    >
-                      {isSavingMemo ? <SavingLabel text="저장 중..." /> : '저장'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            {!isAuthenticated && (
-              <div className="mb-6 space-y-2 border-t border-hairline pt-6 text-sm text-body">
-                <p>
-                  <strong className="text-ink">별점:</strong>{' '}
-                  {viewingBook.rank > 0 ? '⭐'.repeat(viewingBook.rank) : '미평가'}
-                </p>
-                <p>
-                  <strong className="text-ink">독서 진행:</strong> {viewingBook.current_page} /{' '}
-                  {viewingBook.total_pages}p
-                </p>
-              </div>
-            )}
             <div className="space-y-4 border-t border-hairline pt-6 text-sm">
               {viewingBook.description && (
                 <div>
@@ -479,7 +339,7 @@ export function BookDetailModal({
                   </p>
                 </div>
               )}
-              {!isAuthenticated && viewingBook.memo?.trim() && (
+              {viewingBook.memo?.trim() && (
                 <div>
                   <strong className="mb-2 flex items-center text-ink">
                     <FileText className="mr-1.5 size-4 shrink-0 text-mute" />
@@ -492,23 +352,27 @@ export function BookDetailModal({
               )}
             </div>
             {isAuthenticated && (
-              <div className="mt-6 flex gap-4 border-t border-hairline pt-6">
+              <div className="mt-6 flex justify-end gap-2 border-t border-hairline pt-6">
                 <button
                   type="button"
                   onClick={onEdit}
                   disabled={isDeleting}
-                  className="flex-1 rounded-md border border-hairline bg-surface-elevated py-3 text-sm font-medium text-body hover:text-ink disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-60"
+                  aria-label="정보 수정"
+                  title="수정"
                 >
-                  정보 수정하기
+                  <Pencil className="size-4" strokeWidth={1.8} />
                 </button>
                 <button
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className="flex-1 rounded-md border border-hairline bg-surface-elevated py-3 text-sm font-medium text-body hover:text-ink disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-60"
+                  aria-label="삭제"
+                  title="삭제"
                   aria-busy={isDeleting}
                 >
-                  {isDeleting ? <DeletingLabel /> : '삭제하기'}
+                  {isDeleting ? <InlineSpinner /> : <Trash2 className="size-4" strokeWidth={1.8} />}
                 </button>
               </div>
             )}

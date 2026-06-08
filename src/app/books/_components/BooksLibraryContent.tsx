@@ -291,11 +291,6 @@ export function BooksLibraryContent() {
     setViewingBook(null);
   };
 
-  const handleBookUpdated = (book: Book) => {
-    setViewingBook(book);
-    setLibrary((prev) => prev.map((b) => (b.id === book.id ? book : b)));
-  };
-
   const handleDeleteFromModal = async () => {
     if (!viewingBook) return;
     if (!isAuthenticated) {
@@ -529,7 +524,6 @@ export function BooksLibraryContent() {
           onClose={() => setViewingBook(null)}
           onEdit={handleEditFromModal}
           onDelete={handleDeleteFromModal}
-          onBookUpdated={handleBookUpdated}
           isAuthenticated={isAuthenticated}
           isDeleting={isDeleting}
         />

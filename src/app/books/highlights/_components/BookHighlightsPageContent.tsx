@@ -438,7 +438,6 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
             router.push(`/books?edit=${selectedViewingBook.id}`);
           }}
           onDelete={() => {}}
-          onBookUpdated={() => {}}
           isAuthenticated
           isDeleting={false}
           onHighlightChange={handleHighlightChange}

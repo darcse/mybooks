@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { BookOpen, Bookmark, FileText } from 'lucide-react';
-import { toast } from 'sonner';
-import { DeletingLabel, SavingLabel } from '@/components/AsyncMutationUi';
+import { useEffect } from 'react';
+import { BookOpen, Bookmark, FileText, Pencil, Trash2 } from 'lucide-react';
+import { InlineSpinner } from '@/components/AsyncMutationUi';
 import { formatComicAuthorName } from '@/lib/format';
-import { updateComicPartialInDB } from '../actions';
 import type { Comic } from '../types';
 
 interface ComicsDetailModalProps {
@@ -13,18 +11,8 @@ interface ComicsDetailModalProps {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onComicUpdated: (comic: Comic) => void;
   isAuthenticated: boolean | null;
   isDeleting?: boolean;
-}
-
-const inputClass =
-  'h-9 w-full rounded-md border border-hairline bg-surface-elevated px-3 text-sm text-ink outline-none focus:border-[var(--hairline-strong)]';
-const textareaClass =
-  'w-full min-h-24 rounded-md border border-hairline bg-surface-elevated px-3 py-2 text-sm text-ink outline-none focus:border-[var(--hairline-strong)]';
-
-function isUnauthorizedError(error: unknown) {
-  return error instanceof Error && error.message === 'Unauthorized';
 }
 
 export function ComicsDetailModal({
@@ -32,64 +20,15 @@ export function ComicsDetailModal({
   onClose,
   onEdit,
   onDelete,
-  onComicUpdated,
   isAuthenticated,
   isDeleting = false,
 }: ComicsDetailModalProps) {
-  const [currentPage, setCurrentPage] = useState(String(viewingComic.current_page ?? 0));
-  const [memo, setMemo] = useState(viewingComic.memo ?? '');
-  const [isSavingProgress, setIsSavingProgress] = useState(false);
-  const [isSavingMemo, setIsSavingMemo] = useState(false);
-
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
     };
   }, []);
-
-  useEffect(() => {
-    setCurrentPage(String(viewingComic.current_page ?? 0));
-    setMemo(viewingComic.memo ?? '');
-  }, [viewingComic]);
-
-  const handleSaveProgress = async () => {
-    if (!isAuthenticated) {
-      toast.error('로그인이 필요합니다.');
-      return;
-    }
-    setIsSavingProgress(true);
-    try {
-      const updated = await updateComicPartialInDB(viewingComic.id, {
-        current_page: parseInt(currentPage) || 0,
-      });
-      onComicUpdated(updated as Comic);
-      toast.success('진행도가 저장되었습니다.');
-    } catch (error) {
-      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSavingProgress(false);
-    }
-  };
-
-  const handleSaveMemo = async () => {
-    if (!isAuthenticated) {
-      toast.error('로그인이 필요합니다.');
-      return;
-    }
-    setIsSavingMemo(true);
-    try {
-      const updated = await updateComicPartialInDB(viewingComic.id, {
-        memo: memo.trim() || null,
-      });
-      onComicUpdated(updated as Comic);
-      toast.success('메모가 저장되었습니다.');
-    } catch (error) {
-      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSavingMemo(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -161,66 +100,15 @@ export function ComicsDetailModal({
               <strong className="text-ink">시리즈:</strong> {viewingComic.status}
             </p>
           ) : null}
-          {viewingComic.rank > 0 && (
-            <p>
-              <strong className="text-ink">별점:</strong> {'⭐'.repeat(viewingComic.rank)}
-            </p>
-          )}
+          <p>
+            <strong className="text-ink">별점:</strong>{' '}
+            {viewingComic.rank > 0 ? '⭐'.repeat(viewingComic.rank) : '미평가'}
+          </p>
+          <p>
+            <strong className="text-ink">독서 진행:</strong> {viewingComic.current_page} /{' '}
+            {viewingComic.total_pages}p
+          </p>
         </div>
-        {isAuthenticated && (
-          <div className="mb-6 space-y-4 border-t border-hairline pt-6">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-mute">
-                독서 진행 ({viewingComic.total_pages}p)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  max={viewingComic.total_pages || undefined}
-                  className={inputClass}
-                  value={currentPage}
-                  onChange={(e) => setCurrentPage(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveProgress}
-                  disabled={isSavingProgress}
-                  className="shrink-0 rounded-md border border-hairline bg-surface-elevated px-4 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
-                >
-                  {isSavingProgress ? <SavingLabel text="저장 중..." /> : '저장'}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-mute">메모</label>
-              <textarea
-                className={textareaClass}
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="메모를 입력하세요"
-              />
-              <div className="mt-2 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveMemo}
-                  disabled={isSavingMemo}
-                  className="rounded-md border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
-                >
-                  {isSavingMemo ? <SavingLabel text="저장 중..." /> : '저장'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {!isAuthenticated && (
-          <div className="mb-6 space-y-2 border-t border-hairline pt-6 text-sm text-body">
-            <p>
-              <strong className="text-ink">독서 진행:</strong> {viewingComic.current_page} /{' '}
-              {viewingComic.total_pages}p
-            </p>
-          </div>
-        )}
         <div className="space-y-4 border-t border-hairline pt-6 text-sm">
           {viewingComic.description && (
             <div>
@@ -244,7 +132,7 @@ export function ComicsDetailModal({
               </p>
             </div>
           )}
-          {!isAuthenticated && viewingComic.memo?.trim() && (
+          {viewingComic.memo?.trim() && (
             <div>
               <strong className="mb-2 flex items-center text-ink">
                 <FileText className="mr-1.5 size-4 shrink-0 text-mute" />
@@ -257,23 +145,27 @@ export function ComicsDetailModal({
           )}
         </div>
         {isAuthenticated && (
-          <div className="mt-6 flex gap-4 border-t border-hairline pt-6">
+          <div className="mt-6 flex justify-end gap-2 border-t border-hairline pt-6">
             <button
               type="button"
               onClick={onEdit}
               disabled={isDeleting}
-              className="flex-1 rounded-md border border-hairline bg-surface-elevated py-3 text-sm font-medium text-body hover:text-ink disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-60"
+              aria-label="정보 수정"
+              title="수정"
             >
-              정보 수정하기
+              <Pencil className="size-4" strokeWidth={1.8} />
             </button>
             <button
               type="button"
               onClick={onDelete}
               disabled={isDeleting}
-              className="flex-1 rounded-md border border-hairline bg-surface-elevated py-3 text-sm font-medium text-body hover:text-ink disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-60"
+              aria-label="삭제"
+              title="삭제"
               aria-busy={isDeleting}
             >
-              {isDeleting ? <DeletingLabel /> : '삭제하기'}
+              {isDeleting ? <InlineSpinner /> : <Trash2 className="size-4" strokeWidth={1.8} />}
             </button>
           </div>
         )}

@@ -101,27 +101,6 @@ export async function deleteBookFromDB(id: number) {
   return true;
 }
 
-export async function updateBookPartialInDB(
-  id: number,
-  fields: {
-    current_page?: number;
-    rank?: number;
-    memo?: string | null;
-  }
-) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('books')
-    .update(fields)
-    .eq('id', id)
-    .select('*')
-    .single();
-  if (error) throw error;
-  return data;
-}
-
 export async function getBookHighlights(bookId: number) {
   const user = await getCurrentUser();
   if (!user) throw new Error('Unauthorized');

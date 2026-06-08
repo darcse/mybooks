@@ -239,11 +239,6 @@ export function ComicsLibraryContent() {
     setViewingComic(null);
   };
 
-  const handleComicUpdated = (comic: Comic) => {
-    setViewingComic(comic);
-    setLibrary((prev) => prev.map((c) => (c.id === comic.id ? comic : c)));
-  };
-
   const handleDeleteFromModal = async () => {
     if (!viewingComic) return;
     if (!isAuthenticated) {
@@ -401,7 +396,6 @@ export function ComicsLibraryContent() {
           onClose={() => setViewingComic(null)}
           onEdit={handleEditFromModal}
           onDelete={handleDeleteFromModal}
-          onComicUpdated={handleComicUpdated}
           isAuthenticated={isAuthenticated}
           isDeleting={isDeleting}
         />

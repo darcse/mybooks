@@ -19,3 +19,8 @@
 [2026-06-08] [Cursor] PHOTO-001 포토북 목록/카테고리·별점 필터/검색/동일 모델 그룹/로그인 프롬프트 이관 | passes: 변경 없음
 [2026-06-08] [Cursor] PHOTO-002 알라딘 검색 연동, 포토북 등록/수정/삭제(PhotobookForm, server actions) | passes: 변경 없음
 [2026-06-08] [Cursor] PHOTO-003 포토북 상세 모달(별점·메모·방출 상태 저장, SameModelPhotobooks, stale 방지) | passes: 변경 없음
+[2026-06-08] [Cursor] PHOTO-004 포토북 상세 모달 일본 Wikipedia 서머리(썸네일·더 보기 링크, 오류/미검색 시 미노출) | passes: 변경 없음
+[2026-06-08] [Cursor] 도서·코믹스 조회 모달 독서진행·별점·메모 입력폼 제거(읽기 전용, partial update action 삭제) | passes: 변경 없음
+[2026-06-08] [Cursor] 도서·코믹스·포토북 조회 모달 수정/삭제 버튼 아이콘화 및 우측 정렬 | passes: 변경 없음
+[2026-06-08] [Cursor] 도서·코믹스·포토북 수정폼 저장/삭제 버튼 9:1 한 줄 배치 | passes: 변경 없음
+[2026-06-08] [Cursor] 도서·코믹스·포토북 등록/수정폼 열림 시 백그라운드 스크롤 잠금 | passes: 변경 없음

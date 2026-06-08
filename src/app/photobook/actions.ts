@@ -90,24 +90,3 @@ export async function deletePhotobookFromDB(id: number) {
   if (error) throw error;
   return true;
 }
-
-export async function updatePhotobookPartialInDB(
-  id: number,
-  fields: {
-    rank?: number;
-    memo?: string | null;
-    status?: string;
-  }
-) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('photobook')
-    .update(fields)
-    .eq('id', id)
-    .select('*')
-    .single();
-  if (error) throw error;
-  return data;
-}

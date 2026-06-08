@@ -93,23 +93,3 @@ export async function deleteComicFromDB(id: number) {
   if (error) throw error;
   return true;
 }
-
-export async function updateComicPartialInDB(
-  id: number,
-  fields: {
-    current_page?: number;
-    memo?: string | null;
-  }
-) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('comics')
-    .update(fields)
-    .eq('id', id)
-    .select('*')
-    .single();
-  if (error) throw error;
-  return data;
-}

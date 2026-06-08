@@ -42,5 +42,20 @@
         "모달 닫기 후 목록 stale state 없이 최신 데이터 유지 확인"
       ],
       "passes": true
-    }
+    },
+    {
+        "id": "PHOTO-004",
+        "category": "photo",
+        "title": "포토북 상세 모달 — 모델 Wikipedia 서머리",
+        "description": "포토북 상세 모달에서 모델명으로 일본 Wikipedia를 검색해 서머리와 썸네일 이미지를 표시한다.",
+        "steps": [
+          "모델명이 있는 포토북 모달 오픈 시 Wikipedia 서머리 섹션 노출 확인",
+          "서머리 텍스트와 썸네일 이미지 정상 렌더링 확인",
+          "'Wikipedia에서 더 보기' 링크 클릭 시 일본 Wikipedia 페이지로 이동 확인",
+          "Wikipedia 검색 결과가 없을 때 섹션 미노출 또는 안내 메시지 확인",
+          "모델명이 없는 포토북에서 섹션 미노출 확인",
+          "API 오류 시 섹션 미노출 처리 확인"
+        ],
+        "passes": true
+      }
   ]
