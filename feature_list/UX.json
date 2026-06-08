@@ -89,6 +89,21 @@
           "라이트/다크 모드 양쪽에서 아이콘 가독성 확인",
           "모바일 햄버거 메뉴에서도 동일 링크 노출 확인"
         ],
-        "passes": false
+        "passes": true
+      },
+      {
+        "id": "UX-007",
+        "category": "ux",
+        "title": "PWA 설정 — mybooks",
+        "description": "mybooks를 PWA로 설치 가능하게 manifest.json, 아이콘, 서비스워커를 설정한다.",
+        "steps": [
+          "Chrome/Safari에서 books.sshlove.com 접속 시 '홈 화면에 추가' 옵션 노출 확인",
+          "홈 화면에서 앱 아이콘과 이름 'mybooks' 정상 표시 확인",
+          "설치된 앱 실행 시 브라우저 UI 없이 독립 창으로 실행 확인",
+          "manifest.json에 name, short_name, icons, display, start_url, theme_color 포함 확인",
+          "아이콘 192x192, 512x512 사이즈 정상 표시 확인",
+          "오프라인 접속 시 기본 페이지 노출 확인"
+        ],
+        "passes": true
       }
   ]

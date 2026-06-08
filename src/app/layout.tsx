@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Navigation } from "@/components/layout/Navigation";
 import { ThemeAwareToaster } from "@/components/layout/ThemeAwareToaster";
@@ -12,6 +12,19 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "mybooks",
   description: "Personal library for books, comics, and photobooks",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "mybooks",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#07080a",
 };
 
 export default function RootLayout({
