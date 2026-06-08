@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BookOpen } from 'lucide-react';
+import { BarChart2, BookOpen, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { ALADIN_SEARCH_DISPLAY } from '@/lib/aladin';
 import { createClient } from '@/lib/supabase/client';
@@ -20,7 +20,9 @@ import { getOwnershipStatus } from '../utils';
 import { BookDetailModal } from './BookDetailModal';
 import { BookForm } from './BookForm';
 import { BookList } from './BookList';
+import { BookRecommendModal, type BookRecommendPayload } from './BookRecommendModal';
 import { BookSearchSection } from './BookSearchSection';
+import { ReadingStatsModal } from './ReadingStatsModal';
 
 type SortOrder = 'created_desc' | 'purchase_desc' | 'purchase_asc' | 'publish_desc' | 'publish_asc';
 
@@ -101,6 +103,11 @@ export function BooksLibraryContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [consumedEditId, setConsumedEditId] = useState<string | null>(null);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const [recommendModalOpen, setRecommendModalOpen] = useState(false);
+  const [recommendLoading, setRecommendLoading] = useState(false);
+  const [recommendData, setRecommendData] = useState<BookRecommendPayload | null>(null);
+  const [recommendEmptyMessage, setRecommendEmptyMessage] = useState<string | null>(null);
 
   const [listSearchQuery, setListSearchQuery] = useState('');
   const [listCategoryFilter, setListCategoryFilter] = useState('전체');
@@ -425,11 +432,78 @@ export function BooksLibraryContent() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-8 sm:px-6">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 text-2xl font-medium text-ink">
           <BookOpen className="size-7 shrink-0 text-mute" strokeWidth={1.5} />
           Books
         </h1>
+        {isAuthenticated && (
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setStatsModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-body hover:text-ink"
+            >
+              <BarChart2 className="size-4" strokeWidth={1.5} />
+              독서 기록
+            </button>
+            <button
+              type="button"
+              disabled={recommendLoading}
+              onClick={async () => {
+                setRecommendModalOpen(true);
+                setRecommendData(null);
+                setRecommendEmptyMessage(null);
+                if (library.filter((b) => b.status === '완독').length === 0) {
+                  setRecommendEmptyMessage('완독한 도서가 없어 추천을 생성할 수 없습니다.');
+                  setRecommendLoading(false);
+                  return;
+                }
+                setRecommendLoading(true);
+                try {
+                  const res = await fetch('/api/book-recommend', { method: 'POST' });
+                  const json = (await res.json()) as BookRecommendPayload & { error?: string };
+                  if (!res.ok) {
+                    toast.error(
+                      typeof json.error === 'string' ? json.error : '추천을 불러오지 못했습니다.'
+                    );
+                    setRecommendModalOpen(false);
+                    return;
+                  }
+                  if (
+                    !json.owned ||
+                    !json.external ||
+                    typeof json.unreadOwnedCount !== 'number' ||
+                    typeof json.external.detail_url !== 'string' ||
+                    !json.external.detail_url.trim()
+                  ) {
+                    toast.error('응답 형식이 올바르지 않습니다.');
+                    setRecommendModalOpen(false);
+                    return;
+                  }
+                  setRecommendData({
+                    owned: json.owned,
+                    external: json.external,
+                    unreadOwnedCount: json.unreadOwnedCount,
+                  });
+                } catch {
+                  toast.error('추천을 불러오지 못했습니다.');
+                  setRecommendModalOpen(false);
+                } finally {
+                  setRecommendLoading(false);
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-body hover:text-ink disabled:pointer-events-none disabled:opacity-50"
+            >
+              {recommendLoading ? (
+                <span className="inline-block size-4 shrink-0 animate-spin rounded-full border-2 border-hairline border-t-ink" />
+              ) : (
+                <Sparkles className="size-4" strokeWidth={1.5} />
+              )}
+              AI 추천
+            </button>
+          </div>
+        )}
       </div>
 
       {isAuthenticated && (
@@ -458,6 +532,30 @@ export function BooksLibraryContent() {
           onBookUpdated={handleBookUpdated}
           isAuthenticated={isAuthenticated}
           isDeleting={isDeleting}
+        />
+      )}
+
+      <BookRecommendModal
+        open={recommendModalOpen}
+        onClose={() => {
+          setRecommendModalOpen(false);
+          setRecommendData(null);
+          setRecommendEmptyMessage(null);
+        }}
+        loading={recommendLoading}
+        data={recommendData}
+        emptyMessage={recommendEmptyMessage}
+      />
+
+      {statsModalOpen && (
+        <ReadingStatsModal
+          library={library}
+          isAuthenticated={isAuthenticated === true}
+          onClose={() => setStatsModalOpen(false)}
+          onReadingBookClick={(book) => {
+            setStatsModalOpen(false);
+            setViewingBook(book);
+          }}
         />
       )}
 

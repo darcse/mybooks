@@ -72,7 +72,7 @@
         "완독 도서가 0건일 때 빈 상태 처리 확인",
         "Gemini API 오류 시 에러 toast 노출 확인"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BOOK-006",
