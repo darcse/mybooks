@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
+import { Navigation } from "@/components/layout/Navigation";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,8 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} min-h-screen font-sans antialiased`}>
+        <Navigation />
         {children}
+        <Toaster position="top-center" theme="dark" closeButton />
       </body>
     </html>
   );

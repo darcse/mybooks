@@ -4,3 +4,5 @@
 
 [2026-06-08] [Init] 프로젝트 하네스 문서 초기화 (CLAUDE.md, AGENTS.md, HARNESS.md, CONVENTIONS.md, PRODUCT_BRIEF.md, feature_list/)
 [2026-06-08] [Cursor] SETUP-001 Inter 폰트(ss03), Raycast CSS 토큰, canvas 다크 배경 적용 | passes: 변경 없음
+[2026-06-08] [Cursor] SETUP-002 Supabase Auth (client/server, proxy, useAuthState, /login) | passes: 변경 없음
+[2026-06-08] [Cursor] SETUP-003 Raycast 네비게이션, 햄버거 메뉴, Sonner toast | passes: 변경 없음
