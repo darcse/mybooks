@@ -36,3 +36,7 @@
 [2026-06-08] [Cursor] UX-003 후속 Archive 월카드 완독·등록 포토북만 집계·코믹스 제외·빈 월 숨김 | passes: 변경 없음
 [2026-06-08] [Cursor] UX-003 후속2 Archive 월카드 썸네일 최대2(도서1+포토북1) | passes: 변경 없음
 [2026-06-08] [Cursor] Archive 월별 상세 코믹스 제거(완독·등록 포토북만, Gemini 동일) | passes: 변경 없음
+[2026-06-08] [Cursor] UX-005 메인 대시보드(Summary·Recent Picks·Timeless, mylibrary 이관) | passes: 변경 없음
+[2026-06-08] [Cursor] UX-005 후속 레이아웃(Summary 30/70·카테고리 2열·도넛 중앙·Timeless CSS Module) | passes: 변경 없음
+[2026-06-08] [Cursor] UX-005 후속2 Summary·Recent Picks 가로 배치 CSS Module(flex 30/70·33/33/33) | passes: 변경 없음
+[2026-06-08] [Cursor] UX-005 후속3 Summary 카드 동일 높이(292px)·카테고리 4열·max-height 스크롤 | passes: 변경 없음

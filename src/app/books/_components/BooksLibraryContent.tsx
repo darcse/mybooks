@@ -142,6 +142,13 @@ export function BooksLibraryContent() {
   };
 
   useEffect(() => {
+    const viewId = searchParams.get('view');
+    if (!viewId || library.length === 0) return;
+    const book = library.find((b) => String(b.id) === String(viewId));
+    if (book) setViewingBook(book);
+  }, [library, searchParams]);
+
+  useEffect(() => {
     const editId = searchParams.get('edit');
     if (!editId || library.length === 0 || selectedBook || consumedEditId === editId) return;
     const book = library.find((b) => String(b.id) === String(editId));

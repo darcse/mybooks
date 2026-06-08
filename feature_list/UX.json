@@ -58,5 +58,22 @@
           "해당 월 활동이 없을 때 빈 상태 메시지 노출 확인"
         ],
         "passes": true
+      },
+      {
+        "id": "UX-005",
+        "category": "ux",
+        "title": "메인 대시보드 구성",
+        "description": "Summary(소장도서 통계 + 카테고리별 분포), Recent Picks(최근 구입 도서·읽는중 도서·최근 구입 코믹스), Timeless(포토북) 3개 섹션으로 대시보드를 구성한다.",
+        "steps": [
+          "Summary 소장도서 카드 — 총/보유/읽는중/완독 수치 정상 표시 확인",
+          "Summary 카테고리 분포 카드 — lucide 아이콘 + 카테고리명 + 완독/보유 형식 표시 확인",
+          "Recent Picks — 최근 구입 도서 목록 purchase_date 기준 정상 표시 확인",
+          "Recent Picks — 읽는중 도서 목록 status='읽는중' 기준 정상 표시 확인",
+          "Recent Picks — 최근 구입 코믹스 created_at 기준 정상 표시 확인",
+          "Timeless — 포토북 섹션 정상 표시 확인",
+          "비로그인 상태에서도 대시보드 정상 로드 확인",
+          "각 섹션 '더보기' 클릭 시 해당 페이지 이동 확인"
+        ],
+        "passes": true
       }
   ]
