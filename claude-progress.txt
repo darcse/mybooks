@@ -13,3 +13,6 @@
 [2026-06-08] [Cursor] BOOK-005 독서 통계 모달(연도별 완독·카테고리 분포·Gemini 코멘트 캐싱) | passes: 변경 없음
 [2026-06-08] [Cursor] BOOK-006 AI 도서 추천(완독 이력 기반, 보유 미독서·외부 도서 1권) | passes: 변경 없음
 [2026-06-08] [Cursor] UX-001 라이트/다크/자동 테마 토글(localStorage theme-mode, Raycast 다크·mylibrary 라이트 토큰) | passes: 변경 없음
+[2026-06-08] [Cursor] COMICS-001 코믹스 목록/카테고리·상태 필터/검색/페이지네이션 이관 | passes: 변경 없음
+[2026-06-08] [Cursor] COMICS-002 알라딘 검색 연동, 코믹스 등록/수정/삭제(ComicsForm, server actions, 로그인 차단) | passes: 변경 없음
+[2026-06-08] [Cursor] COMICS-003 코믹스 상세 모달(진행도·메모 저장, onComicUpdated로 목록 stale 방지, 로그인 차단) | passes: 변경 없음

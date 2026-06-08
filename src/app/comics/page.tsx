@@ -1,7 +1,12 @@
+'use client';
+
+import { Suspense } from 'react';
+import { ComicsLibraryContent } from './_components/ComicsLibraryContent';
+
 export default function ComicsPage() {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-medium text-ink">Comics</h1>
-    </main>
+    <Suspense fallback={<div className="p-8 text-center text-mute">로딩 중...</div>}>
+      <ComicsLibraryContent />
+    </Suspense>
   );
 }
