@@ -174,25 +174,20 @@ export function Navigation() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 lg:hidden">
-            {externalAppLinkIcons}
-            {themeToggle}
-            {authAction}
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink"
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-nav-menu"
-              aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-              onClick={() => setMobileMenuOpen((o) => !o)}
-            >
-              {mobileMenuOpen ? (
-                <X className="size-5" strokeWidth={2} />
-              ) : (
-                <Menu className="size-5" strokeWidth={2} />
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink lg:hidden"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-menu"
+            aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+            onClick={() => setMobileMenuOpen((o) => !o)}
+          >
+            {mobileMenuOpen ? (
+              <X className="size-5" strokeWidth={2} />
+            ) : (
+              <Menu className="size-5" strokeWidth={2} />
+            )}
+          </button>
         </div>
 
         {mobileMenuOpen && (
@@ -220,46 +215,13 @@ export function Navigation() {
                 ))}
                 <div className="mt-2 border-t border-hairline pt-3">
                   <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
-                    앱
-                  </p>
-                  <div className="flex flex-wrap gap-1 px-3">
-                    {externalAppLinks.map(({ label, href, Icon }) => (
-                      <a
-                        key={href}
-                        href={href}
-                        target="_self"
-                        rel="noopener noreferrer"
-                        className={externalLinkButtonClass}
-                        aria-label={label}
-                        title={label}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <Icon size={16} strokeWidth={2} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-2 border-t border-hairline pt-3">
-                  <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
                     테마
                   </p>
-                  <div className="px-3">
-                    <button
-                      type="button"
-                      onClick={handleThemeToggle}
-                      className="flex w-full items-center gap-3 rounded-sm px-3 py-3 text-[15px] font-medium text-body transition-colors hover:bg-surface-elevated hover:text-ink"
-                    >
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-hairline">
-                        {themeMode === 'light' ? (
-                          <Sun size={16} strokeWidth={2} />
-                        ) : themeMode === 'dark' ? (
-                          <Moon size={16} strokeWidth={2} />
-                        ) : (
-                          <Monitor size={16} strokeWidth={2} />
-                        )}
-                      </span>
+                  <div className="flex items-center gap-3 px-3">
+                    {themeToggle}
+                    <span className="text-[15px] font-medium text-body">
                       {themeMode === 'light' ? '라이트' : themeMode === 'dark' ? '다크' : '자동'}
-                    </button>
+                    </span>
                   </div>
                 </div>
                 <div className="mt-2 border-t border-hairline pt-3">
@@ -288,6 +250,27 @@ export function Navigation() {
                           로그인
                         </Link>
                       ))}
+                  </div>
+                </div>
+                <div className="mt-2 border-t border-hairline pb-1 pt-3">
+                  <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wide text-mute">
+                    외부 앱
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 px-3">
+                    {externalAppLinks.map(({ label, href, Icon }) => (
+                      <a
+                        key={href}
+                        href={href}
+                        target="_self"
+                        rel="noopener noreferrer"
+                        className={externalLinkButtonClass}
+                        aria-label={label}
+                        title={label}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Icon size={16} strokeWidth={2} />
+                      </a>
+                    ))}
                   </div>
                 </div>
               </div>
