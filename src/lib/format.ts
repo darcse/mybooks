@@ -16,3 +16,10 @@ export function formatComicAuthorName(author: string | null | undefined): string
   if (cut < s.length) return s.slice(0, cut).trim();
   return s;
 }
+
+export function formatPubDate(dateStr: string): string | null {
+  if (dateStr && dateStr.length === 8 && !dateStr.includes('-')) {
+    return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
+  }
+  return dateStr || null;
+}

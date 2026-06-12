@@ -1,25 +1,20 @@
 'use server';
 
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
-import { searchAladinBooks as searchAladinBooksLib, getAladinItemByIsbn } from '@/lib/aladin';
+import { formatPubDate } from '@/lib/format';
+import {
+  searchAladinBooks as searchAladinBooksLib,
+  getAladinItemByIsbn as getAladinItemByIsbnLib,
+} from '@/lib/aladin';
 import type { BookHighlight } from './types';
 
 export async function searchAladinBooks(query: string, page: number = 1, display: number = 15) {
-  const { items, totalResults } = await searchAladinBooksLib(query, page, display);
-  return { items, total: totalResults };
+  return searchAladinBooksLib(query, page, display);
 }
 
-export async function getAladinBookDetails(isbn: string) {
-  return getAladinItemByIsbn(isbn);
+export async function getAladinItemByIsbn(isbn: string) {
+  return getAladinItemByIsbnLib(isbn);
 }
-
-const formatPubDate = (dateStr: string) => {
-  if (dateStr && dateStr.length === 8 && !dateStr.includes('-')) {
-    return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
-  }
-  return dateStr || null;
-};
-
 interface BookFormPayload {
   title: string;
   author: string;

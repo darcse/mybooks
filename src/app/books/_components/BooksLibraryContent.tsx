@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import {
   deleteBookFromDB,
-  getAladinBookDetails,
+  getAladinItemByIsbn,
   saveBookToDB,
   searchAladinBooks,
   updateBookInDB,
@@ -205,8 +205,8 @@ export function BooksLibraryContent() {
       const result = await searchAladinBooks(query, 1, ALADIN_SEARCH_DISPLAY);
       setBooks(result.items || []);
       setTotalResults(result.total ?? 0);
-    } catch {
-      toast.error('검색 중 오류가 발생했습니다.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '검색 중 오류가 발생했습니다.');
     } finally {
       setIsSearching(false);
     }
@@ -262,17 +262,19 @@ export function BooksLibraryContent() {
       is_adult: false,
     });
     if (isbn) {
-      getAladinBookDetails(isbn).then((r) => {
-        if (r && (r.total_pages != null || r.description != null)) {
-          setFormData((prev) => ({
-            ...prev,
-            ...(r.total_pages != null && { total_pages: r.total_pages }),
-            ...(r.description != null && {
-              description: r.description.replace(/<\/?[^>]+(>|$)/g, '').trim() || prev.description,
-            }),
-          }));
-        }
-      });
+      getAladinItemByIsbn(isbn)
+        .then((r) => {
+          if (r && (r.total_pages != null || r.description != null)) {
+            setFormData((prev) => ({
+              ...prev,
+              ...(r.total_pages != null && { total_pages: r.total_pages }),
+              ...(r.description != null && {
+                description: r.description.replace(/<\/?[^>]+(>|$)/g, '').trim() || prev.description,
+              }),
+            }));
+          }
+        })
+        .catch(() => {});
     }
   };
 

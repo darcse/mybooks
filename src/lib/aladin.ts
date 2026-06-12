@@ -16,30 +16,41 @@ export type AladinSearchItem = {
 
 export type AladinSearchResult = {
   items: AladinSearchItem[];
-  totalResults: number;
+  total: number;
 };
 
 export async function searchAladinBooks(
   query: string,
-  _page: number = 1,
-  _display: number = 15
+  page: number = 1,
+  display: number = 15
 ): Promise<AladinSearchResult> {
   const key = process.env.ALADIN_TTB_KEY;
   if (!key) throw new Error('ALADIN_TTB_KEY가 설정되지 않았습니다.');
+
+  const safePage = Math.max(1, page);
+  const safeDisplay = Math.max(1, Math.min(display, 50));
+  const start = (safePage - 1) * safeDisplay + 1;
 
   const url = new URL('http://www.aladin.co.kr/ttb/api/ItemSearch.aspx');
   url.searchParams.set('ttbkey', key);
   url.searchParams.set('Query', query);
   url.searchParams.set('QueryType', 'Title');
-  url.searchParams.set('MaxResults', String(ALADIN_SEARCH_DISPLAY));
-  url.searchParams.set('start', '1');
+  url.searchParams.set('MaxResults', String(safeDisplay));
+  url.searchParams.set('start', String(start));
   url.searchParams.set('SearchTarget', 'All');
   url.searchParams.set('output', 'js');
   url.searchParams.set('Version', '20131101');
 
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error('알라딘 API 호출 실패');
-  const data = (await res.json()) as {
+  let res: Response;
+  try {
+    res = await fetch(url.toString());
+  } catch {
+    throw new Error('알라딘 API 호출에 실패했습니다.');
+  }
+  if (!res.ok) {
+    throw new Error('알라딘 API 호출에 실패했습니다.');
+  }
+  let data: {
     item?: Array<{
       title?: string;
       link?: string;
@@ -56,6 +67,11 @@ export async function searchAladinBooks(
     }>;
     totalResults?: number;
   };
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error('알라딘 API 응답을 해석하지 못했습니다.');
+  }
 
   const rawItems = data?.item ?? [];
   const items: AladinSearchItem[] = rawItems.map((it) => ({
@@ -71,8 +87,8 @@ export async function searchAladinBooks(
     total_pages: it.subInfo?.itemPage != null ? String(it.subInfo.itemPage) : '',
   }));
 
-  const totalResults = typeof data.totalResults === 'number' ? data.totalResults : items.length;
-  return { items, totalResults };
+  const total = typeof data.totalResults === 'number' ? data.totalResults : items.length;
+  return { items, total };
 }
 
 export async function getAladinItemByIsbn(isbn: string): Promise<{ total_pages?: string; description?: string } | null> {
@@ -87,15 +103,27 @@ export async function getAladinItemByIsbn(isbn: string): Promise<{ total_pages?:
   url.searchParams.set('output', 'js');
   url.searchParams.set('Version', '20131101');
 
-  const res = await fetch(url.toString());
-  if (!res.ok) return null;
-  const text = await res.text();
+  let res: Response;
+  try {
+    res = await fetch(url.toString());
+  } catch {
+    throw new Error('알라딘 API 호출에 실패했습니다.');
+  }
+  if (!res.ok) {
+    throw new Error('알라딘 API 호출에 실패했습니다.');
+  }
+  let text: string;
+  try {
+    text = await res.text();
+  } catch {
+    throw new Error('알라딘 API 응답을 해석하지 못했습니다.');
+  }
   const jsonStr = text.replace(/;\s*$/, '');
   let data: { item?: Array<{ subInfo?: { itemPage?: number }; description?: string }> };
   try {
     data = JSON.parse(jsonStr);
   } catch {
-    return null;
+    throw new Error('알라딘 API 응답을 해석하지 못했습니다.');
   }
   const item = data?.item?.[0];
   if (!item) return null;

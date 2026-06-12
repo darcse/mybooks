@@ -187,7 +187,7 @@ export function MonthlyTimeline({ year, month }: Props) {
 
   return (
     <div className="mt-6 flex flex-col gap-8">
-      <div className="relative overflow-hidden rounded-lg border border-hairline bg-surface shadow-sm">
+      <div className="relative overflow-hidden rounded-lg border border-hairline bg-surface-elevated">
         <div className="absolute inset-y-0 left-0 w-1 bg-[var(--accent-blue)]" aria-hidden />
         <div className="p-5 pl-6 sm:p-6">
           {loading && !refreshing ? (

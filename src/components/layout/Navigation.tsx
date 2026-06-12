@@ -123,6 +123,8 @@ export function Navigation() {
     )
   );
 
+  const isLoginPage = pathname === '/login';
+
   const isActive = (path: string) =>
     pathname === path || (path !== '/' && pathname?.startsWith(path));
 
@@ -155,42 +157,48 @@ export function Navigation() {
             mybooks
           </Link>
 
-          <div className="ml-10 hidden min-w-0 flex-1 items-center justify-between lg:flex">
-            <div className="flex flex-wrap items-center gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.path}
-                  className={`whitespace-nowrap ${navLinkClass(isActive(item.path), 'desktop')}`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {externalAppLinkIcons}
-              {themeToggle}
-              {authAction}
-            </div>
-          </div>
+          {isLoginPage ? (
+            <div className="flex flex-1 justify-end">{themeToggle}</div>
+          ) : (
+            <>
+              <div className="ml-10 hidden min-w-0 flex-1 items-center justify-between lg:flex">
+                <div className="flex flex-wrap items-center gap-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.path}
+                      className={`whitespace-nowrap ${navLinkClass(isActive(item.path), 'desktop')}`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {externalAppLinkIcons}
+                  {themeToggle}
+                  {authAction}
+                </div>
+              </div>
 
-          <button
-            type="button"
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink lg:hidden"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-nav-menu"
-            aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-            onClick={() => setMobileMenuOpen((o) => !o)}
-          >
-            {mobileMenuOpen ? (
-              <X className="size-5" strokeWidth={2} />
-            ) : (
-              <Menu className="size-5" strokeWidth={2} />
-            )}
-          </button>
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink lg:hidden"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-nav-menu"
+                aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+                onClick={() => setMobileMenuOpen((o) => !o)}
+              >
+                {mobileMenuOpen ? (
+                  <X className="size-5" strokeWidth={2} />
+                ) : (
+                  <Menu className="size-5" strokeWidth={2} />
+                )}
+              </button>
+            </>
+          )}
         </div>
 
-        {mobileMenuOpen && (
+        {!isLoginPage && mobileMenuOpen && (
           <>
             <button
               type="button"

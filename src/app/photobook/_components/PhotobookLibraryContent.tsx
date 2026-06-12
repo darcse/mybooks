@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import {
   deletePhotobookFromDB,
-  getAladinPhotobookDetails,
+  getAladinItemByIsbn,
   savePhotobookToDB,
   searchAladinBooks,
   updatePhotobookInDB,
@@ -181,9 +181,9 @@ export function PhotobookLibraryContent() {
     try {
       const result = await searchAladinBooks(query, 1, ALADIN_SEARCH_DISPLAY);
       setSearchItems(result.items || []);
-      setTotalResults(result.totalResults ?? 0);
-    } catch {
-      toast.error('검색 중 오류가 발생했습니다.');
+      setTotalResults(result.total ?? 0);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '검색 중 오류가 발생했습니다.');
     } finally {
       setIsSearching(false);
     }
@@ -232,11 +232,13 @@ export function PhotobookLibraryContent() {
       is_adult: false,
     });
     if (isbn) {
-      getAladinPhotobookDetails(isbn).then((r) => {
-        if (r?.total_pages != null) {
-          setFormData((prev) => ({ ...prev, total_pages: r.total_pages || prev.total_pages }));
-        }
-      });
+      getAladinItemByIsbn(isbn)
+        .then((r) => {
+          if (r?.total_pages != null) {
+            setFormData((prev) => ({ ...prev, total_pages: r.total_pages || prev.total_pages }));
+          }
+        })
+        .catch(() => {});
     }
   };
 

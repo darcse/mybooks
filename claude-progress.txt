@@ -42,3 +42,10 @@
 [2026-06-08] [Cursor] UX-005 후속3 Summary 카드 동일 높이(292px)·카테고리 4열·max-height 스크롤 | passes: 변경 없음
 [2026-06-08] [Cursor] UX-006 네비 외부 앱 아이콘 링크 4개(Home·Headphones·PenLine·TrendingUp) | passes: 변경 없음
 [2026-06-08] [Cursor] PWA manifest·아이콘(192/512)·apple-touch-icon·layout 메타 추가 | passes: 변경 없음
+[2026-06-08] [Cursor] BUG-001 MonthlyTimeline shadow-sm 제거·bg-surface-elevated elevation | passes: 변경 없음
+[2026-06-08] [Cursor] BUG-002 알라딘 래퍼·formatPubDate lib 통합, 반환 shape {items,total} 통일 | passes: 변경 없음
+[2026-06-08] [Cursor] BUG-003 aladin searchAladinBooks page/display 파라미터 반영, ToastDemo 삭제 | passes: 변경 없음
+[2026-06-08] [Cursor] BUG-004 ReadingStatsModal 4개 차트·코멘트 컴포넌트 분리, 본체 167줄, build 통과 | passes: 변경 없음
+[2026-06-08] [Cursor] BUG-005 /login Navigation 메뉴·햄버거 숨김, 테마 토글만 유지 | passes: 변경 없음
+[2026-06-08] [Cursor] BUG-006 aladin.ts fetch try/catch·한글 에러 throw, handleSearch toast 연동 | passes: 변경 없음
+[2026-06-12] [Claude Code] BUG-001~006 검증 통과 (tsc/build OK) | passes: BUG-001~006 false→true
