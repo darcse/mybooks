@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Bookmark, FileText, Pencil, Trash2 } from 'lucide-react';
+import { BookOpen, Bookmark, Check, FileText, Pencil, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { InlineSpinner, SavingLabel } from '@/components/AsyncMutationUi';
 import { formatAuthorName } from '@/lib/format';
@@ -9,6 +9,7 @@ import {
   createBookHighlight,
   deleteBookHighlight,
   getBookHighlights,
+  updateBookCurrentPage,
   updateBookHighlight,
 } from '../actions';
 import type { Book, BookHighlight } from '../types';
@@ -22,12 +23,15 @@ interface BookDetailModalProps {
   isAuthenticated: boolean | null;
   isDeleting?: boolean;
   onHighlightChange?: (bookId: number) => void | Promise<void>;
+  onBookUpdated?: (book: Book) => void | Promise<void>;
 }
 
 const inputClass =
   'h-9 w-full rounded-md border border-hairline bg-surface-elevated px-3 text-sm text-ink outline-none focus:border-[var(--hairline-strong)]';
 const textareaClass =
   'w-full min-h-24 rounded-md border border-hairline bg-surface-elevated px-3 py-2 text-sm text-ink outline-none focus:border-[var(--hairline-strong)]';
+const inlineNumberClass =
+  'inline h-8 w-[4.5rem] rounded-md border border-hairline bg-surface-elevated px-2 text-sm text-ink outline-none focus:border-[var(--hairline-strong)] disabled:opacity-50';
 
 function normalizeTag(raw: string) {
   const trimmed = raw.trim().replace(/^#+/, '').replace(/\s+/g, '');
@@ -64,15 +68,22 @@ export function BookDetailModal({
   isAuthenticated,
   isDeleting = false,
   onHighlightChange,
+  onBookUpdated,
 }: BookDetailModalProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'highlight'>('info');
   const [highlights, setHighlights] = useState<BookHighlight[]>([]);
   const [isHighlightsLoading, setIsHighlightsLoading] = useState(false);
   const [isSubmittingHighlight, setIsSubmittingHighlight] = useState(false);
-  const [editingHighlightId, setEditingHighlightId] = useState<number | null>(null);
   const [highlightContent, setHighlightContent] = useState('');
   const [highlightTagInput, setHighlightTagInput] = useState('');
   const [highlightTags, setHighlightTags] = useState<string[]>([]);
+  const [inlineEditingId, setInlineEditingId] = useState<number | null>(null);
+  const [inlineEditingContent, setInlineEditingContent] = useState('');
+  const [inlineEditingTagInput, setInlineEditingTagInput] = useState('');
+  const [inlineEditingTags, setInlineEditingTags] = useState<string[]>([]);
+  const [isSavingInlineEdit, setIsSavingInlineEdit] = useState(false);
+  const [currentPageInput, setCurrentPageInput] = useState('');
+  const [isSavingCurrentPage, setIsSavingCurrentPage] = useState(false);
 
   const sortedHighlights = useMemo(
     () =>
@@ -85,10 +96,17 @@ export function BookDetailModal({
   );
 
   const resetHighlightForm = () => {
-    setEditingHighlightId(null);
     setHighlightContent('');
     setHighlightTagInput('');
     setHighlightTags([]);
+  };
+
+  const resetInlineEdit = () => {
+    setInlineEditingId(null);
+    setInlineEditingContent('');
+    setInlineEditingTagInput('');
+    setInlineEditingTags([]);
+    setIsSavingInlineEdit(false);
   };
 
   const fetchHighlights = async () => {
@@ -124,11 +142,56 @@ export function BookDetailModal({
     setHighlightTags((prev) => prev.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleEditHighlight = (highlight: BookHighlight) => {
-    setEditingHighlightId(highlight.id);
-    setHighlightContent(highlight.content);
-    setHighlightTags(highlight.tags || []);
-    setHighlightTagInput('');
+  const beginInlineEdit = (highlight: BookHighlight) => {
+    setInlineEditingId(highlight.id);
+    setInlineEditingContent(highlight.content);
+    setInlineEditingTags(highlight.tags || []);
+    setInlineEditingTagInput('');
+  };
+
+  const commitInlinePendingTags = () => {
+    const pendingTags = parseTagsFromInput(inlineEditingTagInput);
+    if (pendingTags.length === 0) return;
+    setInlineEditingTags((prev) => Array.from(new Set([...prev, ...pendingTags])));
+    setInlineEditingTagInput('');
+  };
+
+  const handleInlineTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    commitInlinePendingTags();
+  };
+
+  const handleRemoveInlineTag = (tagToRemove: string) => {
+    setInlineEditingTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleSaveInlineEdit = async (highlightId: number) => {
+    const normalizedContent = inlineEditingContent.trim();
+    const normalizedTags = Array.from(
+      new Set([...inlineEditingTags, ...parseTagsFromInput(inlineEditingTagInput)])
+    );
+    if (!normalizedContent) {
+      toast.error('하이라이트 내용을 입력해 주세요.');
+      return;
+    }
+    setIsSavingInlineEdit(true);
+    try {
+      const data = await updateBookHighlight(
+        highlightId,
+        viewingBook.id,
+        normalizedContent,
+        normalizedTags
+      );
+      setHighlights((prev) => prev.map((item) => (item.id === highlightId ? data : item)));
+      await onHighlightChange?.(viewingBook.id);
+      resetInlineEdit();
+      toast.success('하이라이트가 수정되었습니다.');
+    } catch (error) {
+      toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '하이라이트 저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSavingInlineEdit(false);
+    }
   };
 
   const handleSaveHighlight = async () => {
@@ -142,22 +205,10 @@ export function BookDetailModal({
     }
     setIsSubmittingHighlight(true);
     try {
-      if (editingHighlightId) {
-        const data = await updateBookHighlight(
-          editingHighlightId,
-          viewingBook.id,
-          normalizedContent,
-          normalizedTags
-        );
-        setHighlights((prev) => prev.map((item) => (item.id === editingHighlightId ? data : item)));
-        await onHighlightChange?.(viewingBook.id);
-        toast.success('하이라이트가 수정되었습니다.');
-      } else {
-        const data = await createBookHighlight(viewingBook.id, normalizedContent, normalizedTags);
-        setHighlights((prev) => [data, ...prev]);
-        await onHighlightChange?.(viewingBook.id);
-        toast.success('하이라이트가 저장되었습니다.');
-      }
+      const data = await createBookHighlight(viewingBook.id, normalizedContent, normalizedTags);
+      setHighlights((prev) => [data, ...prev]);
+      await onHighlightChange?.(viewingBook.id);
+      toast.success('하이라이트가 저장되었습니다.');
       resetHighlightForm();
     } catch (error) {
       toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '하이라이트 저장 중 오류가 발생했습니다.');
@@ -166,13 +217,58 @@ export function BookDetailModal({
     }
   };
 
+  const handleSaveCurrentPage = async () => {
+    if (!isAuthenticated) return;
+
+    const totalPages = viewingBook.total_pages || 0;
+    const rawParsed = parseInt(currentPageInput, 10);
+    let normalized = Number.isNaN(rawParsed) || rawParsed < 0 ? 0 : rawParsed;
+    let wasClamped = false;
+
+    if (totalPages > 0 && normalized > totalPages) {
+      normalized = totalPages;
+      wasClamped = true;
+    }
+
+    setCurrentPageInput(String(normalized));
+
+    if (normalized === viewingBook.current_page) {
+      if (wasClamped) {
+        toast.info(`총 페이지(${totalPages}p)를 초과하여 ${totalPages}p로 조정했습니다.`);
+      }
+      return;
+    }
+
+    setIsSavingCurrentPage(true);
+    try {
+      const updated = await updateBookCurrentPage(viewingBook.id, normalized);
+      await onBookUpdated?.(updated);
+      if (wasClamped) {
+        toast.info(`총 페이지(${totalPages}p)를 초과하여 ${totalPages}p로 저장했습니다.`);
+      }
+    } catch (error) {
+      setCurrentPageInput(String(viewingBook.current_page ?? 0));
+      toast.error(
+        isUnauthorizedError(error) ? '로그인이 필요합니다.' : '독서 진행 저장 중 오류가 발생했습니다.'
+      );
+    } finally {
+      setIsSavingCurrentPage(false);
+    }
+  };
+
+  const handleCurrentPageKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    event.currentTarget.blur();
+  };
+
   const handleDeleteHighlight = async (highlightId: number) => {
     if (!confirm('이 하이라이트를 삭제하시겠습니까?')) return;
     try {
       await deleteBookHighlight(highlightId, viewingBook.id);
       setHighlights((prev) => prev.filter((item) => item.id !== highlightId));
-      if (editingHighlightId === highlightId) {
-        resetHighlightForm();
+      if (inlineEditingId === highlightId) {
+        resetInlineEdit();
       }
       await onHighlightChange?.(viewingBook.id);
       toast.success('하이라이트가 삭제되었습니다.');
@@ -191,7 +287,9 @@ export function BookDetailModal({
   useEffect(() => {
     setActiveTab('info');
     resetHighlightForm();
+    resetInlineEdit();
     setHighlights([]);
+    setCurrentPageInput(String(viewingBook.current_page ?? 0));
   }, [viewingBook]);
 
   useEffect(() => {
@@ -311,9 +409,29 @@ export function BookDetailModal({
                 <strong className="text-ink">별점:</strong>{' '}
                 {viewingBook.rank > 0 ? '⭐'.repeat(viewingBook.rank) : '미평가'}
               </p>
-              <p>
-                <strong className="text-ink">독서 진행:</strong> {viewingBook.current_page} /{' '}
-                {viewingBook.total_pages}p
+              <p className="flex flex-wrap items-center gap-1">
+                <strong className="text-ink">독서 진행:</strong>
+                {isAuthenticated ? (
+                  <>
+                    <input
+                      type="number"
+                      min={0}
+                      max={viewingBook.total_pages > 0 ? viewingBook.total_pages : undefined}
+                      value={currentPageInput}
+                      onChange={(event) => setCurrentPageInput(event.target.value)}
+                      onBlur={handleSaveCurrentPage}
+                      onKeyDown={handleCurrentPageKeyDown}
+                      disabled={isSavingCurrentPage}
+                      className={inlineNumberClass}
+                      aria-label="현재 읽은 페이지"
+                    />
+                    <span>/ {viewingBook.total_pages}p</span>
+                  </>
+                ) : (
+                  <span>
+                    {viewingBook.current_page} / {viewingBook.total_pages}p
+                  </span>
+                )}
               </p>
             </div>
             <div className="space-y-4 border-t border-hairline pt-6 text-sm">
@@ -382,19 +500,8 @@ export function BookDetailModal({
             {isAuthenticated ? (
               <>
                 <div className="rounded-sm border border-hairline bg-surface-elevated p-5">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h3 className="text-base font-medium text-ink">
-                      {editingHighlightId ? '하이라이트 수정' : '하이라이트 기록'}
-                    </h3>
-                    {editingHighlightId ? (
-                      <button
-                        type="button"
-                        onClick={resetHighlightForm}
-                        className="text-sm font-medium text-mute hover:text-body"
-                      >
-                        취소
-                      </button>
-                    ) : null}
+                  <div className="mb-4">
+                    <h3 className="text-base font-medium text-ink">하이라이트 기록</h3>
                   </div>
                   <div className="space-y-4">
                     <textarea
@@ -434,13 +541,7 @@ export function BookDetailModal({
                         disabled={isSubmittingHighlight}
                         className="rounded-md border border-hairline bg-surface px-5 py-2.5 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
                       >
-                        {isSubmittingHighlight ? (
-                          <SavingLabel text="저장 중..." />
-                        ) : editingHighlightId ? (
-                          '수정 저장'
-                        ) : (
-                          '하이라이트 저장'
-                        )}
+                        {isSubmittingHighlight ? <SavingLabel text="저장 중..." /> : '하이라이트 저장'}
                       </button>
                     </div>
                   </div>
@@ -454,33 +555,96 @@ export function BookDetailModal({
                     sortedHighlights.map((highlight) => (
                       <div
                         key={highlight.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleEditHighlight(highlight)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            handleEditHighlight(highlight);
-                          }
-                        }}
-                        className="w-full cursor-pointer rounded-sm border border-hairline bg-surface-elevated p-5 text-left transition-colors hover:border-[var(--hairline-strong)]"
+                        className="rounded-sm border border-hairline bg-surface-elevated p-5"
                       >
                         <div className="mb-3 flex items-start justify-between gap-4">
-                          <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">
-                            {highlight.content}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleDeleteHighlight(highlight.id);
-                            }}
-                            className="shrink-0 text-sm font-medium text-mute hover:text-body"
-                          >
-                            삭제
-                          </button>
+                          {inlineEditingId === highlight.id ? (
+                            <div className="min-w-0 flex-1 space-y-3">
+                              <textarea
+                                value={inlineEditingContent}
+                                onChange={(event) => setInlineEditingContent(event.target.value)}
+                                className={`${textareaClass} min-h-28`}
+                              />
+                              <input
+                                value={inlineEditingTagInput}
+                                onChange={(event) => setInlineEditingTagInput(event.target.value)}
+                                onKeyDown={handleInlineTagKeyDown}
+                                onBlur={commitInlinePendingTags}
+                                placeholder="#인용구 #아이디어 형태로 입력 후 스페이스 또는 엔터"
+                                className={inputClass}
+                              />
+                              {inlineEditingTags.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {inlineEditingTags.map((tag) => (
+                                    <button
+                                      key={`${highlight.id}-edit-${tag}`}
+                                      type="button"
+                                      onClick={() => handleRemoveInlineTag(tag)}
+                                      className="rounded-full border border-hairline bg-surface px-3 py-1 text-xs font-medium text-body hover:text-ink"
+                                    >
+                                      {tag} ×
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <p
+                              className="min-w-0 flex-1 whitespace-pre-wrap text-sm leading-relaxed text-body"
+                              onDoubleClick={() => beginInlineEdit(highlight)}
+                            >
+                              {highlight.content}
+                            </p>
+                          )}
+                          <div className="flex shrink-0 items-center gap-2">
+                            {inlineEditingId === highlight.id ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={resetInlineEdit}
+                                  disabled={isSavingInlineEdit}
+                                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-50"
+                                  aria-label="수정 취소"
+                                  title="취소"
+                                >
+                                  <X className="size-4" strokeWidth={1.8} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveInlineEdit(highlight.id)}
+                                  disabled={isSavingInlineEdit}
+                                  className="inline-flex items-center justify-center rounded-md border border-hairline bg-surface p-2 text-body hover:text-ink disabled:opacity-50"
+                                  aria-label="수정 저장"
+                                  title="저장"
+                                >
+                                  <Check className="size-4" strokeWidth={1.8} />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => beginInlineEdit(highlight)}
+                                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink"
+                                  aria-label="하이라이트 수정"
+                                  title="수정"
+                                >
+                                  <Pencil className="size-4" strokeWidth={1.8} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteHighlight(highlight.id)}
+                                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink"
+                                  aria-label="하이라이트 삭제"
+                                  title="삭제"
+                                >
+                                  <Trash2 className="size-4" strokeWidth={1.8} />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        {(highlight.tags || []).length > 0 ? (
+                        {inlineEditingId !== highlight.id && (highlight.tags || []).length > 0 ? (
                           <div className="flex flex-wrap items-center gap-2">
                             {(highlight.tags || []).map((tag) => (
                               <span

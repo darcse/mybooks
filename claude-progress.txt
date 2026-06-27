@@ -49,3 +49,5 @@
 [2026-06-08] [Cursor] BUG-005 /login Navigation 메뉴·햄버거 숨김, 테마 토글만 유지 | passes: 변경 없음
 [2026-06-08] [Cursor] BUG-006 aladin.ts fetch try/catch·한글 에러 throw, handleSearch toast 연동 | passes: 변경 없음
 [2026-06-12] [Claude Code] BUG-001~006 검증 통과 (tsc/build OK) | passes: BUG-001~006 false→true
+[2026-06-27] [Cursor] BOOK-007 도서 모달 하이라이트 목록 인라인 수정(수정 버튼·더블클릭, 저장/취소, 빈 값 차단) | passes: 변경 없음
+[2026-06-27] [Cursor] BOOK-008 도서 모달 독서 진행 현재 페이지 인라인 편집(blur/Enter 저장, clamp, onBookUpdated) | passes: 변경 없음

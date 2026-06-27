@@ -58,6 +58,7 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [viewingBookOverride, setViewingBookOverride] = useState<Book | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,13 +101,18 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
     [highlightItems, selectedBookId, selectedTag]
   );
 
-  const selectedViewingBook = useMemo(
-    () =>
-      selectedViewingBookId == null
-        ? null
-        : library.find((book) => book.id === selectedViewingBookId) || null,
-    [library, selectedViewingBookId]
-  );
+  const selectedViewingBook = useMemo(() => {
+    if (viewingBookOverride && viewingBookOverride.id === selectedViewingBookId) {
+      return viewingBookOverride;
+    }
+    return selectedViewingBookId == null
+      ? null
+      : library.find((book) => book.id === selectedViewingBookId) || null;
+  }, [library, selectedViewingBookId, viewingBookOverride]);
+
+  useEffect(() => {
+    setViewingBookOverride(null);
+  }, [selectedViewingBookId]);
 
   const hasHighlights = highlightItems.length > 0;
 
@@ -441,6 +447,7 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
           isAuthenticated
           isDeleting={false}
           onHighlightChange={handleHighlightChange}
+          onBookUpdated={setViewingBookOverride}
         />
       ) : null}
     </div>

@@ -6,7 +6,7 @@ import {
   searchAladinBooks as searchAladinBooksLib,
   getAladinItemByIsbn as getAladinItemByIsbnLib,
 } from '@/lib/aladin';
-import type { BookHighlight } from './types';
+import type { Book, BookHighlight } from './types';
 
 export async function searchAladinBooks(query: string, page: number = 1, display: number = 15) {
   return searchAladinBooksLib(query, page, display);
@@ -85,6 +85,20 @@ export async function updateBookInDB(id: number, bookData: BookFormPayload) {
   const { data, error } = await supabase.from('books').update(buildBookRow(bookData)).eq('id', id);
   if (error) throw error;
   return data;
+}
+
+export async function updateBookCurrentPage(bookId: number, currentPage: number) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('books')
+    .update({ current_page: currentPage })
+    .eq('id', bookId)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data as Book;
 }
 
 export async function deleteBookFromDB(id: number) {

@@ -320,6 +320,7 @@ export function MonthlyTimeline({ year, month }: Props) {
           }}
           onDelete={() => toast.info('삭제는 도서 화면에서 진행해 주세요.')}
           isAuthenticated={isAuthenticated}
+          onBookUpdated={setViewingBook}
         />
       )}
 

@@ -535,6 +535,12 @@ export function BooksLibraryContent() {
           onDelete={handleDeleteFromModal}
           isAuthenticated={isAuthenticated}
           isDeleting={isDeleting}
+          onBookUpdated={(updatedBook) => {
+            setViewingBook(updatedBook);
+            setLibrary((prev) =>
+              prev.map((book) => (book.id === updatedBook.id ? updatedBook : book))
+            );
+          }}
         />
       )}
 
