@@ -1,0 +1,80 @@
+{
+  "node": {
+    "402a9059752d93bdf0b35735f0a20afdd41a1de756": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "deleteComicFromDB",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "exportedName": "deleteComicFromDB",
+      "filename": "src/app/comics/actions.ts"
+    },
+    "407284d02ec24cf3eb17b09be7f4537e8050c1484e": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "getAladinItemByIsbn",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "exportedName": "getAladinItemByIsbn",
+      "filename": "src/app/comics/actions.ts"
+    },
+    "40fbd4fc23b2e800d3785e7821c120767eeb137384": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "saveComicToDB",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "exportedName": "saveComicToDB",
+      "filename": "src/app/comics/actions.ts"
+    },
+    "70f811d32723324550b61828888913f855f0c9d78b": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "searchAladinBooks",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "exportedName": "searchAladinBooks",
+      "filename": "src/app/comics/actions.ts"
+    },
+    "601cd29c04dcf24eed90573b2c66faf3e00a90f121": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "updateComicInDB",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "exportedName": "updateComicInDB",
+      "filename": "src/app/comics/actions.ts"
+    }
+  },
+  "edge": {}
+}

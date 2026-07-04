@@ -1,0 +1,80 @@
+{
+  "node": {
+    "40d2812361c13fecd78099232c2a120868ad1ea33e": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "deletePhotobookFromDB",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "exportedName": "deletePhotobookFromDB",
+      "filename": "src/app/photobook/actions.ts"
+    },
+    "409b80bf8cb715a5a6e07db40c0818ec5a6b4e0219": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "getAladinItemByIsbn",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "exportedName": "getAladinItemByIsbn",
+      "filename": "src/app/photobook/actions.ts"
+    },
+    "40e7f3c7f1e96bc6a9461d97707d0b98d1c9ac322f": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "savePhotobookToDB",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "exportedName": "savePhotobookToDB",
+      "filename": "src/app/photobook/actions.ts"
+    },
+    "70e6b2ad0741004c2664ee611f9a52ec0fa32106af": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "searchAladinBooks",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "exportedName": "searchAladinBooks",
+      "filename": "src/app/photobook/actions.ts"
+    },
+    "60a5da93284c01b06263ead52dbaeb4ca64ef6bcb2": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "updatePhotobookInDB",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "exportedName": "updatePhotobookInDB",
+      "filename": "src/app/photobook/actions.ts"
+    }
+  },
+  "edge": {}
+}

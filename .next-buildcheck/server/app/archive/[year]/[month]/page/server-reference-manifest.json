@@ -1,0 +1,80 @@
+{
+  "node": {
+    "7099cb4ef17fc5cb4061c23442e40b1f3c35d5eebc": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "createBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser"
+      },
+      "exportedName": "createBookHighlight",
+      "filename": "src/app/books/actions.ts"
+    },
+    "60e667ccfb3aad446978655170e1c6a0cc4dc71237": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "deleteBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser"
+      },
+      "exportedName": "deleteBookHighlight",
+      "filename": "src/app/books/actions.ts"
+    },
+    "40cdfb43e218f6ac1b02e1446e2526f09ba1978b3b": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "getBookHighlights",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser"
+      },
+      "exportedName": "getBookHighlights",
+      "filename": "src/app/books/actions.ts"
+    },
+    "6086856e65e35c92ae18b700d9d060e9a042fcf718": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "updateBookCurrentPage",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser"
+      },
+      "exportedName": "updateBookCurrentPage",
+      "filename": "src/app/books/actions.ts"
+    },
+    "78a13621ddb3cb7ddc0fa51c62800b865ada96327e": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "updateBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser"
+      },
+      "exportedName": "updateBookHighlight",
+      "filename": "src/app/books/actions.ts"
+    }
+  },
+  "edge": {}
+}

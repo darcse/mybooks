@@ -1,0 +1,376 @@
+{
+  "node": {
+    "7099cb4ef17fc5cb4061c23442e40b1f3c35d5eebc": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "createBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/highlights/page": {
+          "moduleId": "54105",
+          "async": false,
+          "exportedName": "createBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "createBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser",
+        "app/books/highlights/page": "action-browser",
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "createBookHighlight"
+    },
+    "60e667ccfb3aad446978655170e1c6a0cc4dc71237": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "deleteBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/highlights/page": {
+          "moduleId": "54105",
+          "async": false,
+          "exportedName": "deleteBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "deleteBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser",
+        "app/books/highlights/page": "action-browser",
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "deleteBookHighlight"
+    },
+    "40cdfb43e218f6ac1b02e1446e2526f09ba1978b3b": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "getBookHighlights",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/highlights/page": {
+          "moduleId": "54105",
+          "async": false,
+          "exportedName": "getBookHighlights",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "getBookHighlights",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser",
+        "app/books/highlights/page": "action-browser",
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "getBookHighlights"
+    },
+    "6086856e65e35c92ae18b700d9d060e9a042fcf718": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "updateBookCurrentPage",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/highlights/page": {
+          "moduleId": "54105",
+          "async": false,
+          "exportedName": "updateBookCurrentPage",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "updateBookCurrentPage",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser",
+        "app/books/highlights/page": "action-browser",
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "updateBookCurrentPage"
+    },
+    "78a13621ddb3cb7ddc0fa51c62800b865ada96327e": {
+      "workers": {
+        "app/archive/[year]/[month]/page": {
+          "moduleId": "80909",
+          "async": false,
+          "exportedName": "updateBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/highlights/page": {
+          "moduleId": "54105",
+          "async": false,
+          "exportedName": "updateBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        },
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "updateBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/archive/[year]/[month]/page": "action-browser",
+        "app/books/highlights/page": "action-browser",
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "updateBookHighlight"
+    },
+    "408c995df507f2dfb5ddba05a956bc0ea53aec2772": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "deleteBookFromDB",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "deleteBookFromDB"
+    },
+    "40c9552635eb86ff1f338738e7dfab0b8048fbbcb2": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "getAladinItemByIsbn",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "getAladinItemByIsbn"
+    },
+    "40a1482d810440c196a20199fe74efeeb19adffe63": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "saveBookToDB",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "saveBookToDB"
+    },
+    "704b0fe7846d51050d394d0df83cf2e546b9e188bc": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "searchAladinBooks",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "searchAladinBooks"
+    },
+    "604467f3d5d8056cc7fca070a9caee5127b9b05f34": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "updateBookInDB",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "filename": "src/app/books/actions.ts",
+      "exportedName": "updateBookInDB"
+    },
+    "402a9059752d93bdf0b35735f0a20afdd41a1de756": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "deleteComicFromDB",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "filename": "src/app/comics/actions.ts",
+      "exportedName": "deleteComicFromDB"
+    },
+    "407284d02ec24cf3eb17b09be7f4537e8050c1484e": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "getAladinItemByIsbn",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "filename": "src/app/comics/actions.ts",
+      "exportedName": "getAladinItemByIsbn"
+    },
+    "40fbd4fc23b2e800d3785e7821c120767eeb137384": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "saveComicToDB",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "filename": "src/app/comics/actions.ts",
+      "exportedName": "saveComicToDB"
+    },
+    "70f811d32723324550b61828888913f855f0c9d78b": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "searchAladinBooks",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "filename": "src/app/comics/actions.ts",
+      "exportedName": "searchAladinBooks"
+    },
+    "601cd29c04dcf24eed90573b2c66faf3e00a90f121": {
+      "workers": {
+        "app/comics/page": {
+          "moduleId": "9356",
+          "async": false,
+          "exportedName": "updateComicInDB",
+          "filename": "src/app/comics/actions.ts"
+        }
+      },
+      "layer": {
+        "app/comics/page": "action-browser"
+      },
+      "filename": "src/app/comics/actions.ts",
+      "exportedName": "updateComicInDB"
+    },
+    "40d2812361c13fecd78099232c2a120868ad1ea33e": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "deletePhotobookFromDB",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "filename": "src/app/photobook/actions.ts",
+      "exportedName": "deletePhotobookFromDB"
+    },
+    "409b80bf8cb715a5a6e07db40c0818ec5a6b4e0219": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "getAladinItemByIsbn",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "filename": "src/app/photobook/actions.ts",
+      "exportedName": "getAladinItemByIsbn"
+    },
+    "40e7f3c7f1e96bc6a9461d97707d0b98d1c9ac322f": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "savePhotobookToDB",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "filename": "src/app/photobook/actions.ts",
+      "exportedName": "savePhotobookToDB"
+    },
+    "70e6b2ad0741004c2664ee611f9a52ec0fa32106af": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "searchAladinBooks",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "filename": "src/app/photobook/actions.ts",
+      "exportedName": "searchAladinBooks"
+    },
+    "60a5da93284c01b06263ead52dbaeb4ca64ef6bcb2": {
+      "workers": {
+        "app/photobook/page": {
+          "moduleId": "4400",
+          "async": false,
+          "exportedName": "updatePhotobookInDB",
+          "filename": "src/app/photobook/actions.ts"
+        }
+      },
+      "layer": {
+        "app/photobook/page": "action-browser"
+      },
+      "filename": "src/app/photobook/actions.ts",
+      "exportedName": "updatePhotobookInDB"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "yRdpc529MZnR/mTYk3zRnJ4F4CNAHBIYARsjLKe9xQA="
+}

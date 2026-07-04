@@ -7,6 +7,7 @@ import { DashboardTimelessSection } from './_components/DashboardTimelessSection
 import layout from './_components/DashboardLayout.module.css';
 
 export const dynamic = 'force-dynamic';
+export const preferredRegion = 'icn1';
 
 export default function Page() {
   const year = new Date().getFullYear();

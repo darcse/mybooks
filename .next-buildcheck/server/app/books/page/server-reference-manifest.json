@@ -1,0 +1,155 @@
+{
+  "node": {
+    "408c995df507f2dfb5ddba05a956bc0ea53aec2772": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "deleteBookFromDB",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "deleteBookFromDB",
+      "filename": "src/app/books/actions.ts"
+    },
+    "40c9552635eb86ff1f338738e7dfab0b8048fbbcb2": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "getAladinItemByIsbn",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "getAladinItemByIsbn",
+      "filename": "src/app/books/actions.ts"
+    },
+    "40a1482d810440c196a20199fe74efeeb19adffe63": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "saveBookToDB",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "saveBookToDB",
+      "filename": "src/app/books/actions.ts"
+    },
+    "704b0fe7846d51050d394d0df83cf2e546b9e188bc": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "searchAladinBooks",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "searchAladinBooks",
+      "filename": "src/app/books/actions.ts"
+    },
+    "604467f3d5d8056cc7fca070a9caee5127b9b05f34": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "updateBookInDB",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "updateBookInDB",
+      "filename": "src/app/books/actions.ts"
+    },
+    "7099cb4ef17fc5cb4061c23442e40b1f3c35d5eebc": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "createBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "createBookHighlight",
+      "filename": "src/app/books/actions.ts"
+    },
+    "60e667ccfb3aad446978655170e1c6a0cc4dc71237": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "deleteBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "deleteBookHighlight",
+      "filename": "src/app/books/actions.ts"
+    },
+    "40cdfb43e218f6ac1b02e1446e2526f09ba1978b3b": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "getBookHighlights",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "getBookHighlights",
+      "filename": "src/app/books/actions.ts"
+    },
+    "6086856e65e35c92ae18b700d9d060e9a042fcf718": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "updateBookCurrentPage",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "updateBookCurrentPage",
+      "filename": "src/app/books/actions.ts"
+    },
+    "78a13621ddb3cb7ddc0fa51c62800b865ada96327e": {
+      "workers": {
+        "app/books/page": {
+          "moduleId": "79766",
+          "async": false,
+          "exportedName": "updateBookHighlight",
+          "filename": "src/app/books/actions.ts"
+        }
+      },
+      "layer": {
+        "app/books/page": "action-browser"
+      },
+      "exportedName": "updateBookHighlight",
+      "filename": "src/app/books/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "functions": {
+    "/": {
+      "regions": [
+        "icn1"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/book-recommend/route": "app/api/book-recommend/route.js",
+  "/api/book-stats-comment/route": "app/api/book-stats-comment/route.js",
+  "/api/monthly-review-comment/route": "app/api/monthly-review-comment/route.js",
+  "/archive/[year]/[month]/page": "app/archive/[year]/[month]/page.js",
+  "/archive/page": "app/archive/page.js",
+  "/books/highlights/page": "app/books/highlights/page.js",
+  "/books/page": "app/books/page.js",
+  "/comics/page": "app/comics/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/photobook/page": "app/photobook/page.js"
+}

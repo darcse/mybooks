@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  distDir: process.env.BUILD_CHECK === "true" ? ".next-buildcheck" : ".next",
 };
 
 export default nextConfig;
