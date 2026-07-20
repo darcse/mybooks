@@ -33,6 +33,7 @@ export interface BookHighlight {
   created_at: string;
   updated_at: string;
   source_app: string | null;
+  ai_explanation: string | null;
 }
 
 export interface AladinSearchBookItem {

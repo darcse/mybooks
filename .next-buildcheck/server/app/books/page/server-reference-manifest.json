@@ -1,6 +1,6 @@
 {
   "node": {
-    "408c995df507f2dfb5ddba05a956bc0ea53aec2772": {
+    "406e109b1f86acc0d8c90003c1d79fff36a1fd28c6": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -15,7 +15,7 @@
       "exportedName": "deleteBookFromDB",
       "filename": "src/app/books/actions.ts"
     },
-    "40c9552635eb86ff1f338738e7dfab0b8048fbbcb2": {
+    "408c92df0776d770a3e321fa3d72d6550345975970": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -30,7 +30,7 @@
       "exportedName": "getAladinItemByIsbn",
       "filename": "src/app/books/actions.ts"
     },
-    "40a1482d810440c196a20199fe74efeeb19adffe63": {
+    "408fd2818a43e04c9985ec0140470bf90de0cc21ce": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -45,7 +45,7 @@
       "exportedName": "saveBookToDB",
       "filename": "src/app/books/actions.ts"
     },
-    "704b0fe7846d51050d394d0df83cf2e546b9e188bc": {
+    "7029c7471ec61de79a178349ae87fb17bd3cb87f5f": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -60,7 +60,7 @@
       "exportedName": "searchAladinBooks",
       "filename": "src/app/books/actions.ts"
     },
-    "604467f3d5d8056cc7fca070a9caee5127b9b05f34": {
+    "6046b5a42f795759b6751e7cc3c999834ee22e9d08": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -75,7 +75,7 @@
       "exportedName": "updateBookInDB",
       "filename": "src/app/books/actions.ts"
     },
-    "7099cb4ef17fc5cb4061c23442e40b1f3c35d5eebc": {
+    "702553141aa9a3ad90fab249b8ce8125e44cee0387": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -90,7 +90,7 @@
       "exportedName": "createBookHighlight",
       "filename": "src/app/books/actions.ts"
     },
-    "60e667ccfb3aad446978655170e1c6a0cc4dc71237": {
+    "602c396128bd2d4d52e024e6ca39c2140eb90b4712": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -105,7 +105,7 @@
       "exportedName": "deleteBookHighlight",
       "filename": "src/app/books/actions.ts"
     },
-    "40cdfb43e218f6ac1b02e1446e2526f09ba1978b3b": {
+    "40e9ea8c5d638207491e801185362b4709993a68a7": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -120,7 +120,7 @@
       "exportedName": "getBookHighlights",
       "filename": "src/app/books/actions.ts"
     },
-    "6086856e65e35c92ae18b700d9d060e9a042fcf718": {
+    "6049123eb3b8b0c935e36a618cdce4698fed97af2e": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",
@@ -135,7 +135,7 @@
       "exportedName": "updateBookCurrentPage",
       "filename": "src/app/books/actions.ts"
     },
-    "78a13621ddb3cb7ddc0fa51c62800b865ada96327e": {
+    "787002914d281c8afa6c168edc0b19736ccde05830": {
       "workers": {
         "app/books/page": {
           "moduleId": "79766",

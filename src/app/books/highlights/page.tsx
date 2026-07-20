@@ -21,9 +21,17 @@ function BookHighlightsLoginPrompt() {
   );
 }
 
-export default async function BookHighlightsPage() {
+type Props = {
+  searchParams: Promise<{ bookId?: string }>;
+};
+
+export default async function BookHighlightsPage({ searchParams }: Props) {
   const user = await getCurrentUser();
   if (!user) return <BookHighlightsLoginPrompt />;
+
+  const sp = await searchParams;
+  const initialBookId =
+    typeof sp.bookId === 'string' && /^\d+$/.test(sp.bookId.trim()) ? sp.bookId.trim() : undefined;
 
   const supabase = await createClient();
   const { data: libraryRows, error: libraryError } = await supabase
@@ -35,7 +43,7 @@ export default async function BookHighlightsPage() {
 
   const { data: highlightRows, error: highlightError } = await supabase
     .from('book_highlights')
-    .select('id, book_id, user_id, content, tags, created_at, updated_at, source_app')
+    .select('id, book_id, user_id, content, tags, created_at, updated_at, source_app, ai_explanation')
     .order('created_at', { ascending: false });
 
   if (highlightError) throw highlightError;
@@ -77,7 +85,11 @@ export default async function BookHighlightsPage() {
           Books
         </h1>
       </div>
-      <BookHighlightsPageContent items={items} library={(libraryRows as Book[]) || []} />
+      <BookHighlightsPageContent
+        items={items}
+        library={(libraryRows as Book[]) || []}
+        initialBookId={initialBookId}
+      />
     </div>
   );
 }

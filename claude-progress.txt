@@ -52,3 +52,12 @@
 [2026-06-12] [Claude Code] BUG-001~006 검증 통과 (tsc/build OK) | passes: BUG-001~006 false→true
 [2026-06-27] [Cursor] BOOK-007 도서 모달 하이라이트 목록 인라인 수정(수정 버튼·더블클릭, 저장/취소, 빈 값 차단) | passes: 변경 없음
 [2026-06-27] [Cursor] BOOK-008 도서 모달 독서 진행 현재 페이지 인라인 편집(blur/Enter 저장, clamp, onBookUpdated) | passes: 변경 없음
+[2026-07-20] [Cursor] BOOK-009 하이라이트 화면 도서 필터 시 빠른 등록 모달(본문·태그, createBookHighlight 재사용) | passes: 변경 없음
+[2026-07-20] [Cursor] BOOK-010 하이라이트 AI 해설(API·모달·DB 저장, gemini-3.1-flash-lite-preview) | passes: 변경 없음
+[2026-07-20] [Cursor] BOOK-010 후속: AI버튼 수정 앞 배치, 모달→인라인, 해설삭제, 프롬프트 고도화 | passes: 변경 없음
+[2026-07-20] [Cursor] BOOK-010 Gemini 프롬프트에 도서 제목·저자 컨텍스트 추가 | passes: 변경 없음
+[2026-07-20] [Cursor] BOOK-010 AI 해설 Gemini→Claude(claude-sonnet-5) 교체, @anthropic-ai/sdk | passes: 변경 없음
+[2026-07-20] [Cursor] BOOK-010 하이라이트 목록 SELECT에 ai_explanation 추가(새로고침 시 해설 표시) | passes: 변경 없음
+[2026-07-20] [Cursor] 도서 모달→하이라이트 화면 링크(bookId 쿼리 필터) | passes: 변경 없음
+[2026-07-20] [Cursor] 도서 모달 하이라이트 바로가기 — 하이라이트 있는 도서만 표시 | passes: 변경 없음
+[2026-07-20] [Cursor] Claude 해설 프롬프트 — 제목/헤더 없이 본문만 출력 지시 추가 | passes: 변경 없음

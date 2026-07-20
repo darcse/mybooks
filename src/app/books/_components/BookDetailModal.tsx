@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Bookmark, Check, FileText, Pencil, Trash2, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { BookMarked, BookOpen, Bookmark, Check, FileText, Pencil, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { InlineSpinner, SavingLabel } from '@/components/AsyncMutationUi';
 import { formatAuthorName } from '@/lib/format';
@@ -70,6 +71,7 @@ export function BookDetailModal({
   onHighlightChange,
   onBookUpdated,
 }: BookDetailModalProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'info' | 'highlight'>('info');
   const [highlights, setHighlights] = useState<BookHighlight[]>([]);
   const [isHighlightsLoading, setIsHighlightsLoading] = useState(false);
@@ -293,10 +295,10 @@ export function BookDetailModal({
   }, [viewingBook]);
 
   useEffect(() => {
-    if (activeTab !== 'highlight') return;
     fetchHighlights();
-  }, [activeTab, viewingBook?.id, isAuthenticated]);
+  }, [viewingBook?.id, isAuthenticated]);
 
+  const hasHighlights = highlights.length > 0;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-sm border border-hairline bg-surface p-8">
@@ -356,31 +358,47 @@ export function BookDetailModal({
           </div>
         </div>
         <div className="mb-6 border-b border-hairline">
-          <div className="-mb-px flex gap-6">
-            <button
-              type="button"
-              onClick={() => setActiveTab('info')}
-              className={`border-b-2 px-1 pb-3 text-sm transition-colors ${
-                activeTab === 'info'
-                  ? 'border-ink font-medium text-ink'
-                  : 'border-transparent text-mute hover:text-body'
-              }`}
-              aria-pressed={activeTab === 'info'}
-            >
-              도서 정보
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('highlight')}
-              className={`border-b-2 px-1 pb-3 text-sm transition-colors ${
-                activeTab === 'highlight'
-                  ? 'border-ink font-medium text-ink'
-                  : 'border-transparent text-mute hover:text-body'
-              }`}
-              aria-pressed={activeTab === 'highlight'}
-            >
-              하이라이트
-            </button>
+          <div className="-mb-px flex items-center justify-between gap-4">
+            <div className="flex gap-6">
+              <button
+                type="button"
+                onClick={() => setActiveTab('info')}
+                className={`border-b-2 px-1 pb-3 text-sm transition-colors ${
+                  activeTab === 'info'
+                    ? 'border-ink font-medium text-ink'
+                    : 'border-transparent text-mute hover:text-body'
+                }`}
+                aria-pressed={activeTab === 'info'}
+              >
+                도서 정보
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('highlight')}
+                className={`border-b-2 px-1 pb-3 text-sm transition-colors ${
+                  activeTab === 'highlight'
+                    ? 'border-ink font-medium text-ink'
+                    : 'border-transparent text-mute hover:text-body'
+                }`}
+                aria-pressed={activeTab === 'highlight'}
+              >
+                하이라이트
+              </button>
+            </div>
+            {hasHighlights ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  router.push(`/books/highlights?bookId=${viewingBook.id}`);
+                }}
+                className="mb-px inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-hairline text-body transition-colors hover:bg-surface-elevated hover:text-ink"
+                aria-label="하이라이트 화면에서 이 도서 보기"
+                title="하이라이트 화면에서 이 도서 보기"
+              >
+                <BookMarked className="size-4" strokeWidth={1.8} />
+              </button>
+            ) : null}
           </div>
         </div>
         {activeTab === 'info' ? (

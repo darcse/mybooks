@@ -2,6 +2,7 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/api/book-recommend/route": "app/api/book-recommend/route.js",
   "/api/book-stats-comment/route": "app/api/book-stats-comment/route.js",
+  "/api/highlight-explanation/route": "app/api/highlight-explanation/route.js",
   "/api/monthly-review-comment/route": "app/api/monthly-review-comment/route.js",
   "/archive/[year]/[month]/page": "app/archive/[year]/[month]/page.js",
   "/archive/page": "app/archive/page.js",

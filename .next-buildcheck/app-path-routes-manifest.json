@@ -2,6 +2,7 @@
   "/_not-found/page": "/_not-found",
   "/api/book-recommend/route": "/api/book-recommend",
   "/api/book-stats-comment/route": "/api/book-stats-comment",
+  "/api/highlight-explanation/route": "/api/highlight-explanation",
   "/api/monthly-review-comment/route": "/api/monthly-review-comment",
   "/archive/[year]/[month]/page": "/archive/[year]/[month]",
   "/archive/page": "/archive",

@@ -3,11 +3,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check, ChevronUp, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronUp, Pencil, Plus, RefreshCw, Sparkles, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatAuthorName } from '@/lib/format';
 import { BookDetailModal } from '../../_components/BookDetailModal';
-import { deleteBookHighlight, getBookHighlights, updateBookHighlight } from '../../actions';
+import {
+  createBookHighlight,
+  deleteBookHighlight,
+  getBookHighlights,
+  updateBookHighlight,
+} from '../../actions';
 import type { Book, BookHighlight } from '../../types';
 
 export type BookHighlightListItem = BookHighlight & {
@@ -17,7 +22,15 @@ export type BookHighlightListItem = BookHighlight & {
 type BookHighlightsPageContentProps = {
   items: BookHighlightListItem[];
   library: Book[];
+  initialBookId?: string;
 };
+
+function resolveInitialBookId(raw?: string) {
+  if (!raw) return 'all';
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) return 'all';
+  return trimmed;
+}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('ko-KR', {
@@ -45,11 +58,17 @@ function filterTagClass(active: boolean) {
     : 'border-hairline text-body hover:text-ink';
 }
 
-export function BookHighlightsPageContent({ items, library }: BookHighlightsPageContentProps) {
+export function BookHighlightsPageContent({
+  items,
+  library,
+  initialBookId,
+}: BookHighlightsPageContentProps) {
   const router = useRouter();
   const [highlightItems, setHighlightItems] = useState(items);
   const [selectedViewingBookId, setSelectedViewingBookId] = useState<number | null>(null);
-  const [selectedBookId, setSelectedBookId] = useState<string>('all');
+  const [selectedBookId, setSelectedBookId] = useState<string>(() =>
+    resolveInitialBookId(initialBookId)
+  );
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
@@ -59,6 +78,13 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [viewingBookOverride, setViewingBookOverride] = useState<Book | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createContent, setCreateContent] = useState('');
+  const [createTagInput, setCreateTagInput] = useState('');
+  const [createTags, setCreateTags] = useState<string[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [explainingId, setExplainingId] = useState<number | null>(null);
+  const [clearingExplanationId, setClearingExplanationId] = useState<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,10 +102,19 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
         seen.set(item.book.id, item.book.title);
       }
     });
+    if (selectedBookId !== 'all') {
+      const bookId = Number(selectedBookId);
+      if (!seen.has(bookId)) {
+        const fromLibrary = library.find((book) => book.id === bookId);
+        if (fromLibrary) {
+          seen.set(fromLibrary.id, fromLibrary.title);
+        }
+      }
+    }
     return Array.from(seen.entries())
       .map(([id, title]) => ({ id, title }))
       .sort((a, b) => a.title.localeCompare(b.title, 'ko'));
-  }, [highlightItems]);
+  }, [highlightItems, library, selectedBookId]);
 
   const tagOptions = useMemo(() => {
     const tagSet = new Set<string>();
@@ -115,6 +150,28 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
   }, [selectedViewingBookId]);
 
   const hasHighlights = highlightItems.length > 0;
+  const isBookFiltered = selectedBookId !== 'all';
+  const selectedFilterBook = useMemo(() => {
+    if (!isBookFiltered) return null;
+    const bookId = Number(selectedBookId);
+    const fromLibrary = library.find((book) => book.id === bookId);
+    if (fromLibrary) {
+      return {
+        id: fromLibrary.id,
+        title: fromLibrary.title,
+        author: fromLibrary.author,
+        cover_image_url: fromLibrary.cover_image_url,
+      };
+    }
+    const fromOptions = bookOptions.find((book) => book.id === bookId);
+    if (!fromOptions) return null;
+    return {
+      id: fromOptions.id,
+      title: fromOptions.title,
+      author: null as string | null,
+      cover_image_url: null as string | null,
+    };
+  }, [bookOptions, isBookFiltered, library, selectedBookId]);
 
   const resetEditing = () => {
     setEditingId(null);
@@ -122,6 +179,142 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
     setEditingTagInput('');
     setEditingTags([]);
     setIsSaving(false);
+  };
+
+  const resetCreateForm = () => {
+    setCreateContent('');
+    setCreateTagInput('');
+    setCreateTags([]);
+    setIsCreating(false);
+  };
+
+  useEffect(() => {
+    if (isBookFiltered) return;
+    setIsCreateModalOpen(false);
+    resetCreateForm();
+  }, [isBookFiltered]);
+
+  const closeCreateModal = () => {
+    if (isCreating) return;
+    setIsCreateModalOpen(false);
+    resetCreateForm();
+  };
+
+  const commitCreatePendingTags = () => {
+    const pendingTags = parseTagsFromInput(createTagInput);
+    if (pendingTags.length === 0) return;
+    setCreateTags((prev) => Array.from(new Set([...prev, ...pendingTags])));
+    setCreateTagInput('');
+  };
+
+  const handleCreateTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    commitCreatePendingTags();
+  };
+
+  const handleRemoveCreateTag = (tagToRemove: string) => {
+    setCreateTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleCreateHighlight = async () => {
+    if (!selectedFilterBook) return;
+    const content = createContent.trim();
+    const tags = Array.from(new Set([...createTags, ...parseTagsFromInput(createTagInput)]));
+    if (!content) {
+      toast.error('하이라이트 내용을 입력해 주세요.');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const created = await createBookHighlight(selectedFilterBook.id, content, tags);
+      const nextItem: BookHighlightListItem = {
+        ...created,
+        book: selectedFilterBook,
+      };
+      setHighlightItems((prev) =>
+        [nextItem, ...prev].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+      );
+      setIsCreateModalOpen(false);
+      resetCreateForm();
+      toast.success('하이라이트가 저장되었습니다.');
+    } catch {
+      toast.error('하이라이트 저장 중 오류가 발생했습니다.');
+      setIsCreating(false);
+    }
+  };
+
+  const handleGenerateExplanation = async (item: BookHighlightListItem, force = false) => {
+    if (explainingId != null || clearingExplanationId != null) return;
+    setExplainingId(item.id);
+    try {
+      const res = await fetch('/api/highlight-explanation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ highlightId: item.id, force }),
+      });
+      const data = (await res.json()) as {
+        explanation?: unknown;
+        error?: unknown;
+        message?: unknown;
+      };
+      if (!res.ok) {
+        const msg =
+          (typeof data.message === 'string' && data.message) ||
+          (typeof data.error === 'string' && data.error) ||
+          'AI 해설 생성에 실패했습니다.';
+        toast.error(msg);
+        return;
+      }
+      const explanation =
+        typeof data.explanation === 'string' && data.explanation.trim() !== ''
+          ? data.explanation.trim()
+          : null;
+      if (!explanation) {
+        toast.error('AI 해설을 생성하지 못했습니다.');
+        return;
+      }
+      setHighlightItems((prev) =>
+        prev.map((entry) =>
+          entry.id === item.id ? { ...entry, ai_explanation: explanation } : entry
+        )
+      );
+    } catch {
+      toast.error('AI 해설 생성에 실패했습니다.');
+    } finally {
+      setExplainingId(null);
+    }
+  };
+
+  const handleClearExplanation = async (item: BookHighlightListItem) => {
+    if (explainingId != null || clearingExplanationId != null) return;
+    setClearingExplanationId(item.id);
+    try {
+      const res = await fetch('/api/highlight-explanation', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ highlightId: item.id }),
+      });
+      const data = (await res.json()) as { error?: unknown };
+      if (!res.ok) {
+        toast.error(
+          typeof data.error === 'string' ? data.error : 'AI 해설 삭제에 실패했습니다.'
+        );
+        return;
+      }
+      setHighlightItems((prev) =>
+        prev.map((entry) =>
+          entry.id === item.id ? { ...entry, ai_explanation: null } : entry
+        )
+      );
+    } catch {
+      toast.error('AI 해설 삭제에 실패했습니다.');
+    } finally {
+      setClearingExplanationId(null);
+    }
   };
 
   const beginEdit = (item: BookHighlightListItem) => {
@@ -277,16 +470,34 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
         <div className="rounded-sm border border-hairline bg-surface-elevated px-5 py-12 text-center text-sm text-mute">
           아직 저장된 하이라이트가 없습니다.
         </div>
-      ) : filteredItems.length === 0 ? (
-        <div className="rounded-sm border border-hairline bg-surface-elevated px-5 py-12 text-center text-sm text-mute">
-          현재 필터에 맞는 하이라이트가 없습니다.
-        </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-sm font-medium text-body">
-            총 <span className="text-ink">{filteredItems.length}</span>개
-          </p>
-          {filteredItems.map((item) => (
+          {(isBookFiltered || filteredItems.length > 0) && (
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-body">
+                총 <span className="text-ink">{filteredItems.length}</span>개
+              </p>
+              {isBookFiltered && selectedFilterBook ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetCreateForm();
+                    setIsCreateModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-surface px-3 py-1.5 text-sm font-medium text-body hover:text-ink"
+                >
+                  <Plus className="size-4" strokeWidth={1.8} />
+                  등록
+                </button>
+              ) : null}
+            </div>
+          )}
+          {filteredItems.length === 0 ? (
+            <div className="rounded-sm border border-hairline bg-surface-elevated px-5 py-12 text-center text-sm text-mute">
+              현재 필터에 맞는 하이라이트가 없습니다.
+            </div>
+          ) : (
+            filteredItems.map((item) => (
             <article
               key={item.id}
               className="rounded-sm border border-hairline bg-surface-elevated p-5"
@@ -339,6 +550,21 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
                         </>
                       ) : (
                         <>
+                          {!item.ai_explanation?.trim() ? (
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateExplanation(item, false)}
+                              disabled={explainingId === item.id || clearingExplanationId != null}
+                              className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-50"
+                              aria-label="AI 해설"
+                              title="AI 해설"
+                            >
+                              <Sparkles
+                                className={`size-4 ${explainingId === item.id ? 'animate-pulse' : ''}`}
+                                strokeWidth={1.8}
+                              />
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             onClick={() => beginEdit(item)}
@@ -413,15 +639,127 @@ export function BookHighlightsPageContent({ items, library }: BookHighlightsPage
                           ))}
                         </div>
                       ) : null}
+                      {item.ai_explanation?.trim() ? (
+                        <div className="mt-4 rounded-sm border border-hairline bg-surface px-4 py-3">
+                          <div className="mb-2 flex items-center justify-between gap-2">
+                            <p className="text-xs font-medium text-mute">AI 해설</p>
+                            <div className="flex shrink-0 items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleGenerateExplanation(item, true)}
+                                disabled={
+                                  explainingId === item.id || clearingExplanationId === item.id
+                                }
+                                className="inline-flex items-center gap-1 rounded-md border border-hairline px-2 py-1 text-xs font-medium text-body hover:text-ink disabled:opacity-50"
+                                aria-label="AI 해설 재생성"
+                                title="재생성"
+                              >
+                                <RefreshCw
+                                  className={`size-3.5 ${explainingId === item.id ? 'animate-spin' : ''}`}
+                                  strokeWidth={1.8}
+                                />
+                                {explainingId === item.id ? '생성 중…' : '재생성'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleClearExplanation(item)}
+                                disabled={
+                                  explainingId === item.id || clearingExplanationId === item.id
+                                }
+                                className="inline-flex items-center gap-1 rounded-md border border-hairline px-2 py-1 text-xs font-medium text-body hover:text-ink disabled:opacity-50"
+                                aria-label="AI 해설 삭제"
+                                title="해설 삭제"
+                              >
+                                <Trash2 className="size-3.5" strokeWidth={1.8} />
+                                {clearingExplanationId === item.id ? '삭제 중…' : '삭제'}
+                              </button>
+                            </div>
+                          </div>
+                          <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">
+                            {item.ai_explanation}
+                          </p>
+                        </div>
+                      ) : explainingId === item.id ? (
+                        <p className="mt-4 text-sm text-mute">AI 해설 생성 중…</p>
+                      ) : null}
                     </>
                   )}
                   <p className="mt-4 text-xs text-mute">{formatDate(item.created_at)}</p>
                 </div>
               </div>
             </article>
-          ))}
+            ))
+          )}
         </div>
       )}
+
+      {isCreateModalOpen && selectedFilterBook ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="relative w-full max-w-lg rounded-sm border border-hairline bg-surface p-6">
+            <button
+              type="button"
+              onClick={closeCreateModal}
+              disabled={isCreating}
+              className="absolute right-5 top-4 text-2xl font-medium text-mute hover:text-ink disabled:opacity-50"
+              aria-label="모달 닫기"
+            >
+              &times;
+            </button>
+            <h3 className="mb-1 pr-8 text-lg font-medium text-ink">하이라이트 등록</h3>
+            <p className="mb-5 truncate text-sm text-body">
+              <span dangerouslySetInnerHTML={{ __html: selectedFilterBook.title }} />
+            </p>
+            <div className="space-y-4">
+              <textarea
+                value={createContent}
+                onChange={(event) => setCreateContent(event.target.value)}
+                placeholder="문장, 메모, 아이디어를 기록해 보세요."
+                className="min-h-32 w-full resize-y rounded-md border border-hairline bg-surface-elevated px-4 py-3 text-sm text-ink outline-none focus:border-[var(--hairline-strong)]"
+              />
+              <input
+                value={createTagInput}
+                onChange={(event) => setCreateTagInput(event.target.value)}
+                onKeyDown={handleCreateTagKeyDown}
+                onBlur={commitCreatePendingTags}
+                placeholder="#인용구 #아이디어 형태로 입력 후 스페이스 또는 엔터"
+                className="h-[42px] w-full rounded-md border border-hairline bg-surface-elevated px-3 py-2 text-sm text-ink outline-none focus:border-[var(--hairline-strong)]"
+              />
+              {createTags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {createTags.map((tag) => (
+                    <button
+                      key={`create-${tag}`}
+                      type="button"
+                      onClick={() => handleRemoveCreateTag(tag)}
+                      className="rounded-full border border-hairline bg-surface-elevated px-3 py-1 text-xs font-medium text-body hover:text-ink"
+                    >
+                      {tag} ×
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={closeCreateModal}
+                  disabled={isCreating}
+                  className="rounded-md border border-hairline px-4 py-2.5 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateHighlight}
+                  disabled={isCreating}
+                  className="rounded-md border border-hairline bg-surface-elevated px-4 py-2.5 text-sm font-medium text-body hover:text-ink disabled:opacity-50"
+                >
+                  {isCreating ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {showBackToTop ? (
         <button
