@@ -22,6 +22,7 @@ interface PhotobookListProps {
   libraryEmpty?: boolean;
   onAuthorClick: (author: string) => void;
   onItemClick?: (book: Photobook) => void;
+  onModelClick?: () => void;
 }
 
 export function PhotobookList({
@@ -41,6 +42,7 @@ export function PhotobookList({
   libraryEmpty = false,
   onAuthorClick,
   onItemClick,
+  onModelClick,
 }: PhotobookListProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -90,6 +92,15 @@ export function PhotobookList({
                 </button>
               )}
             </div>
+            {onModelClick ? (
+              <button
+                type="button"
+                className="inline-flex h-[34px] shrink-0 items-center rounded-md border border-hairline bg-surface-elevated px-4 text-[13px] font-medium text-body hover:text-ink"
+                onClick={onModelClick}
+              >
+                모델
+              </button>
+            ) : null}
             <button
               type="button"
               className="inline-flex h-[34px] shrink-0 items-center gap-2 rounded-md border border-hairline bg-surface-elevated px-4 text-[13px] font-medium text-body hover:text-ink"

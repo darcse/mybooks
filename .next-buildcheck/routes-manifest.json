@@ -27,6 +27,14 @@
         "nxtPmonth": "nxtPmonth"
       },
       "namedRegex": "^/archive/(?<nxtPyear>[^/]+?)/(?<nxtPmonth>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/books/highlights/[bookId]",
+      "regex": "^/books/highlights/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPbookId": "nxtPbookId"
+      },
+      "namedRegex": "^/books/highlights/(?<nxtPbookId>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [

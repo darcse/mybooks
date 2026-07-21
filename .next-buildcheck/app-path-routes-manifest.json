@@ -6,6 +6,7 @@
   "/api/monthly-review-comment/route": "/api/monthly-review-comment",
   "/archive/[year]/[month]/page": "/archive/[year]/[month]",
   "/archive/page": "/archive",
+  "/books/highlights/[bookId]/page": "/books/highlights/[bookId]",
   "/books/highlights/page": "/books/highlights",
   "/books/page": "/books",
   "/comics/page": "/comics",

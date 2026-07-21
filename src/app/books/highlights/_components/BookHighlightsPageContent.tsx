@@ -2,16 +2,18 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, ChevronUp, Pencil, Plus, RefreshCw, Sparkles, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
 import { formatAuthorName } from '@/lib/format';
 import { BookDetailModal } from '../../_components/BookDetailModal';
+import { BookForm } from '../../_components/BookForm';
 import {
   createBookHighlight,
   deleteBookHighlight,
   getBookHighlights,
   updateBookHighlight,
+  updateBookInDB,
 } from '../../actions';
 import type { Book, BookHighlight } from '../../types';
 
@@ -23,6 +25,8 @@ type BookHighlightsPageContentProps = {
   items: BookHighlightListItem[];
   library: Book[];
   initialBookId?: string;
+  fixedBookId?: number;
+  backHref?: string;
 };
 
 function resolveInitialBookId(raw?: string) {
@@ -40,6 +44,13 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatTime(value: string) {
+  const date = new Date(value);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 function normalizeTag(raw: string) {
   const trimmed = raw.trim().replace(/^#+/, '').replace(/\s+/g, '');
   return trimmed ? `#${trimmed}` : null;
@@ -54,22 +65,97 @@ function parseTagsFromInput(raw: string) {
 
 function filterTagClass(active: boolean) {
   return active
-    ? 'border-[var(--hairline-strong)] bg-surface-elevated text-ink'
-    : 'border-hairline text-body hover:text-ink';
+    ? 'border border-primary bg-primary text-on-primary font-semibold shadow-sm'
+    : 'border border-ash bg-surface text-body hover:border-ink/50 hover:text-ink';
+}
+
+const initialFormData = {
+  title: '',
+  author: '',
+  publisher: '',
+  publish_date: '',
+  isbn: '',
+  price: '',
+  link: '',
+  description: '',
+  cover_image_url: '',
+  total_pages: '',
+  format: '종이책',
+  purchase_date: '',
+  category: 'IT',
+  ownership_status: '보유중',
+  status: '읽기 전',
+  current_page: '',
+  rank: 0,
+  bookmark: '',
+  memo: '',
+  finished_at: '',
+  is_adult: false,
+};
+
+function bookToFormData(book: Book) {
+  return {
+    title: book.title || '',
+    author: book.author || '',
+    publisher: book.publisher || '',
+    publish_date: book.publish_date || '',
+    isbn: book.isbn || '',
+    price: String(book.price ?? ''),
+    cover_image_url: book.cover_image_url || '',
+    link: book.link || '',
+    description: book.description || '',
+    total_pages: String(book.total_pages ?? ''),
+    format: book.format || '종이책',
+    purchase_date: book.purchase_date || '',
+    category: book.category || 'IT',
+    ownership_status:
+      book.ownership_status ||
+      (book.format === '방출' || book.status === '방출' ? '방출' : '보유중'),
+    status: book.status || '읽기 전',
+    current_page: String(book.current_page ?? ''),
+    rank: book.rank ?? 0,
+    bookmark: book.bookmark || '',
+    memo: book.memo || '',
+    finished_at: book.finished_at ?? '',
+    is_adult: !!book.is_adult,
+  };
+}
+
+function toBookSummary(book: Book) {
+  return {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    cover_image_url: book.cover_image_url,
+  };
+}
+
+function formatBookStatus(book: Book) {
+  if (book.status === '완독' && book.finished_at) return `완독 (${book.finished_at})`;
+  if (book.status === '컬렉션') return 'Collection';
+  return book.status;
+}
+
+function formatReadingProgress(book: Book) {
+  return `${book.current_page} / ${book.total_pages}p`;
 }
 
 export function BookHighlightsPageContent({
   items,
   library,
   initialBookId,
+  fixedBookId,
+  backHref,
 }: BookHighlightsPageContentProps) {
-  const router = useRouter();
+  const isSingleBookView = fixedBookId != null;
   const [highlightItems, setHighlightItems] = useState(items);
+  const [libraryState, setLibraryState] = useState(library);
   const [selectedViewingBookId, setSelectedViewingBookId] = useState<number | null>(null);
   const [selectedBookId, setSelectedBookId] = useState<string>(() =>
-    resolveInitialBookId(initialBookId)
+    fixedBookId != null ? String(fixedBookId) : resolveInitialBookId(initialBookId)
   );
   const [selectedTag, setSelectedTag] = useState<string>('all');
+  const [dateSort, setDateSort] = useState<'desc' | 'asc'>('desc');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [editingTagInput, setEditingTagInput] = useState('');
@@ -77,7 +163,9 @@ export function BookHighlightsPageContent({
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [viewingBookOverride, setViewingBookOverride] = useState<Book | null>(null);
+  const [editBook, setEditBook] = useState<Book | null>(null);
+  const [formData, setFormData] = useState(initialFormData);
+  const [isSavingBook, setIsSavingBook] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createContent, setCreateContent] = useState('');
   const [createTagInput, setCreateTagInput] = useState('');
@@ -85,6 +173,10 @@ export function BookHighlightsPageContent({
   const [isCreating, setIsCreating] = useState(false);
   const [explainingId, setExplainingId] = useState<number | null>(null);
   const [clearingExplanationId, setClearingExplanationId] = useState<number | null>(null);
+
+  useEffect(() => {
+    setLibraryState(library);
+  }, [library]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,7 +197,7 @@ export function BookHighlightsPageContent({
     if (selectedBookId !== 'all') {
       const bookId = Number(selectedBookId);
       if (!seen.has(bookId)) {
-        const fromLibrary = library.find((book) => book.id === bookId);
+        const fromLibrary = libraryState.find((book) => book.id === bookId);
         if (fromLibrary) {
           seen.set(fromLibrary.id, fromLibrary.title);
         }
@@ -114,55 +206,54 @@ export function BookHighlightsPageContent({
     return Array.from(seen.entries())
       .map(([id, title]) => ({ id, title }))
       .sort((a, b) => a.title.localeCompare(b.title, 'ko'));
-  }, [highlightItems, library, selectedBookId]);
+  }, [highlightItems, libraryState, selectedBookId]);
 
   const tagOptions = useMemo(() => {
     const tagSet = new Set<string>();
-    highlightItems.forEach((item) => {
+    const sourceItems = isSingleBookView
+      ? highlightItems.filter((item) => item.book_id === fixedBookId)
+      : highlightItems;
+    sourceItems.forEach((item) => {
       (item.tags || []).forEach((tag) => {
         if (tag.trim()) tagSet.add(tag);
       });
     });
     return Array.from(tagSet).sort((a, b) => a.localeCompare(b, 'ko'));
-  }, [highlightItems]);
+  }, [fixedBookId, highlightItems, isSingleBookView]);
 
-  const filteredItems = useMemo(
-    () =>
-      highlightItems.filter((item) => {
-        const matchesBook = selectedBookId === 'all' || String(item.book.id) === selectedBookId;
-        const matchesTag = selectedTag === 'all' || (item.tags || []).includes(selectedTag);
-        return matchesBook && matchesTag;
-      }),
-    [highlightItems, selectedBookId, selectedTag]
-  );
+  const filteredItems = useMemo(() => {
+    const matched = highlightItems.filter((item) => {
+      const matchesBook = selectedBookId === 'all' || String(item.book.id) === selectedBookId;
+      const matchesTag = selectedTag === 'all' || (item.tags || []).includes(selectedTag);
+      return matchesBook && matchesTag;
+    });
+    if (!isSingleBookView) return matched;
+    return [...matched].sort((a, b) => {
+      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return dateSort === 'desc' ? -diff : diff;
+    });
+  }, [dateSort, highlightItems, isSingleBookView, selectedBookId, selectedTag]);
 
   const selectedViewingBook = useMemo(() => {
-    if (viewingBookOverride && viewingBookOverride.id === selectedViewingBookId) {
-      return viewingBookOverride;
-    }
     return selectedViewingBookId == null
       ? null
-      : library.find((book) => book.id === selectedViewingBookId) || null;
-  }, [library, selectedViewingBookId, viewingBookOverride]);
+      : libraryState.find((book) => book.id === selectedViewingBookId) || null;
+  }, [libraryState, selectedViewingBookId]);
 
-  useEffect(() => {
-    setViewingBookOverride(null);
-  }, [selectedViewingBookId]);
+  const headerBook = useMemo(() => {
+    if (!isSingleBookView || fixedBookId == null) return null;
+    return libraryState.find((book) => book.id === fixedBookId) ?? null;
+  }, [fixedBookId, isSingleBookView, libraryState]);
 
-  const hasHighlights = highlightItems.length > 0;
-  const isBookFiltered = selectedBookId !== 'all';
+  const hasHighlights = isSingleBookView
+    ? highlightItems.some((item) => item.book_id === fixedBookId)
+    : highlightItems.length > 0;
+  const isBookFiltered = isSingleBookView || selectedBookId !== 'all';
   const selectedFilterBook = useMemo(() => {
     if (!isBookFiltered) return null;
     const bookId = Number(selectedBookId);
-    const fromLibrary = library.find((book) => book.id === bookId);
-    if (fromLibrary) {
-      return {
-        id: fromLibrary.id,
-        title: fromLibrary.title,
-        author: fromLibrary.author,
-        cover_image_url: fromLibrary.cover_image_url,
-      };
-    }
+    const fromLibrary = libraryState.find((book) => book.id === bookId);
+    if (fromLibrary) return toBookSummary(fromLibrary);
     const fromOptions = bookOptions.find((book) => book.id === bookId);
     if (!fromOptions) return null;
     return {
@@ -171,7 +262,16 @@ export function BookHighlightsPageContent({
       author: null as string | null,
       cover_image_url: null as string | null,
     };
-  }, [bookOptions, isBookFiltered, library, selectedBookId]);
+  }, [bookOptions, isBookFiltered, libraryState, selectedBookId]);
+
+  const applyBookUpdate = (updated: Book) => {
+    setLibraryState((prev) => prev.map((book) => (book.id === updated.id ? updated : book)));
+    setHighlightItems((prev) =>
+      prev.map((item) =>
+        item.book_id === updated.id ? { ...item, book: toBookSummary(updated) } : item
+      )
+    );
+  };
 
   const resetEditing = () => {
     setEditingId(null);
@@ -379,7 +479,7 @@ export function BookHighlightsPageContent({
   const handleHighlightChange = async (bookId: number) => {
     try {
       const refreshed = await getBookHighlights(bookId);
-      const sourceBook = library.find((book) => book.id === bookId);
+      const sourceBook = libraryState.find((book) => book.id === bookId);
       const refreshedItems: BookHighlightListItem[] = refreshed.map((highlight) => ({
         ...highlight,
         book: sourceBook
@@ -408,15 +508,54 @@ export function BookHighlightsPageContent({
     }
   };
 
+  const handleEditFromModal = () => {
+    if (!selectedViewingBook) return;
+    setEditBook(selectedViewingBook);
+    setFormData(bookToFormData(selectedViewingBook));
+    setSelectedViewingBookId(null);
+  };
+
+  const handleBookFormSave = async () => {
+    if (!editBook) return;
+    setIsSavingBook(true);
+    try {
+      await updateBookInDB(editBook.id, formData);
+      const client = createClient();
+      const { data: updatedRow } = await client
+        .from('books')
+        .select('*')
+        .eq('id', editBook.id)
+        .single();
+      if (updatedRow) {
+        applyBookUpdate(updatedRow as Book);
+      }
+      toast.success('도서 정보가 성공적으로 수정되었습니다.');
+      setEditBook(null);
+    } catch {
+      toast.error('저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSavingBook(false);
+    }
+  };
+
+  const handleBookImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () =>
+      setFormData((prev) => ({ ...prev, cover_image_url: reader.result as string }));
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="mt-8 space-y-6 border-t border-hairline pt-8">
       <div className="mb-2 flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:gap-6">
         <div className="flex shrink-0 items-center gap-3">
           <Link
-            href="/books"
+            href={backHref ?? '/books'}
             className="inline-flex items-center justify-center rounded-md border border-hairline bg-surface-elevated p-2 text-body hover:text-ink"
-            aria-label="소장 목록으로 돌아가기"
-            title="소장 목록으로 돌아가기"
+            aria-label={isSingleBookView ? '하이라이트 목록으로 돌아가기' : '소장 목록으로 돌아가기'}
+            title={isSingleBookView ? '하이라이트 목록으로 돌아가기' : '소장 목록으로 돌아가기'}
           >
             <ArrowLeft className="size-4" strokeWidth={1.8} />
           </Link>
@@ -424,7 +563,100 @@ export function BookHighlightsPageContent({
         </div>
       </div>
 
+      {isSingleBookView && headerBook ? (
+        <div className="flex items-start gap-4 rounded-sm border border-hairline bg-surface-elevated p-5">
+          {headerBook.cover_image_url ? (
+            <img
+              src={headerBook.cover_image_url}
+              alt=""
+              className="h-32 w-24 shrink-0 rounded-sm border border-hairline object-cover"
+            />
+          ) : (
+            <div className="flex h-32 w-24 shrink-0 items-center justify-center rounded-sm border border-hairline bg-surface text-xs text-mute">
+              No cover
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={() => setSelectedViewingBookId(headerBook.id)}
+              className="text-left text-lg font-medium text-ink hover:text-body"
+            >
+              <span dangerouslySetInnerHTML={{ __html: headerBook.title }} />
+            </button>
+            {headerBook.author ? (
+              <p className="mt-2 text-sm text-body">
+                {formatAuthorName(headerBook.author)}
+              </p>
+            ) : null}
+            <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm text-body sm:grid-cols-2">
+              <p>
+                <strong className="text-ink">출판사:</strong> {headerBook.publisher || '-'}
+              </p>
+              <p>
+                <strong className="text-ink">발매일:</strong> {headerBook.publish_date || '-'}
+              </p>
+              <p>
+                <strong className="text-ink">카테고리:</strong> {headerBook.category}
+              </p>
+              <p>
+                <strong className="text-ink">상태:</strong>{' '}
+                <span className="font-medium text-ink">{formatBookStatus(headerBook)}</span>
+              </p>
+              <p className="sm:col-span-2">
+                <strong className="text-ink">독서 진행:</strong> {formatReadingProgress(headerBook)}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="rounded-sm border border-hairline bg-surface-elevated p-5">
+        {isSingleBookView ? (
+          <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+            <div className="space-y-2 text-sm">
+              <span className="block font-medium text-mute">태그별 필터</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTag('all')}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(selectedTag === 'all')}`}
+                >
+                  전체 태그
+                </button>
+                {tagOptions.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSelectedTag(tag)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(selectedTag === tag)}`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2 text-sm">
+              <span className="block font-medium text-mute">날짜 정렬</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDateSort('desc')}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(dateSort === 'desc')}`}
+                >
+                  최근순
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDateSort('asc')}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(dateSort === 'asc')}`}
+                >
+                  이전순
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="grid gap-4 md:grid-cols-[minmax(0,260px)_1fr]">
           <label className="space-y-2 text-sm">
             <span className="block font-medium text-mute">도서별 필터</span>
@@ -447,7 +679,7 @@ export function BookHighlightsPageContent({
               <button
                 type="button"
                 onClick={() => setSelectedTag('all')}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(selectedTag === 'all')}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(selectedTag === 'all')}`}
               >
                 전체 태그
               </button>
@@ -456,7 +688,7 @@ export function BookHighlightsPageContent({
                   key={tag}
                   type="button"
                   onClick={() => setSelectedTag(tag)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(selectedTag === tag)}`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterTagClass(selectedTag === tag)}`}
                 >
                   {tag}
                 </button>
@@ -464,6 +696,7 @@ export function BookHighlightsPageContent({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {!hasHighlights ? (
@@ -503,7 +736,7 @@ export function BookHighlightsPageContent({
               className="rounded-sm border border-hairline bg-surface-elevated p-5"
             >
               <div className="flex items-start gap-4">
-                {item.book.cover_image_url ? (
+                {!isSingleBookView && item.book.cover_image_url ? (
                   <img
                     src={item.book.cover_image_url}
                     alt=""
@@ -511,19 +744,13 @@ export function BookHighlightsPageContent({
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
-                  <div className="mb-3 flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedViewingBookId(item.book.id)}
-                        className="text-left text-base font-medium text-ink hover:text-body"
-                      >
-                        <span dangerouslySetInnerHTML={{ __html: item.book.title }} />
-                      </button>
-                      {item.book.author ? (
-                        <p className="mt-1 text-sm text-body">{formatAuthorName(item.book.author)}</p>
-                      ) : null}
-                    </div>
+                  <div className="mb-3 flex items-center justify-between gap-4">
+                    <p className="text-base font-semibold text-ink tabular-nums">
+                      {formatDate(item.created_at)}
+                      <span className="ml-2 text-xs font-normal text-mute tabular-nums">
+                        {formatTime(item.created_at)}
+                      </span>
+                    </p>
                     <div className="flex shrink-0 items-center gap-2">
                       {editingId === item.id ? (
                         <>
@@ -588,6 +815,20 @@ export function BookHighlightsPageContent({
                       )}
                     </div>
                   </div>
+                  {!isSingleBookView ? (
+                    <div className="mb-3 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedViewingBookId(item.book.id)}
+                        className="text-left text-base font-medium text-ink hover:text-body"
+                      >
+                        <span dangerouslySetInnerHTML={{ __html: item.book.title }} />
+                      </button>
+                      {item.book.author ? (
+                        <p className="mt-1 text-sm text-body">{formatAuthorName(item.book.author)}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {editingId === item.id ? (
                     <div className="space-y-3">
                       <textarea
@@ -632,7 +873,7 @@ export function BookHighlightsPageContent({
                               key={`${item.id}-${tag}`}
                               type="button"
                               onClick={() => setSelectedTag(tag)}
-                              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${filterTagClass(selectedTag === tag)}`}
+                              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterTagClass(selectedTag === tag)}`}
                             >
                               {tag}
                             </button>
@@ -684,7 +925,6 @@ export function BookHighlightsPageContent({
                       ) : null}
                     </>
                   )}
-                  <p className="mt-4 text-xs text-mute">{formatDate(item.created_at)}</p>
                 </div>
               </div>
             </article>
@@ -777,15 +1017,27 @@ export function BookHighlightsPageContent({
         <BookDetailModal
           viewingBook={selectedViewingBook}
           onClose={() => setSelectedViewingBookId(null)}
-          onEdit={() => {
-            setSelectedViewingBookId(null);
-            router.push(`/books?edit=${selectedViewingBook.id}`);
-          }}
+          onEdit={handleEditFromModal}
           onDelete={() => {}}
           isAuthenticated
           isDeleting={false}
           onHighlightChange={handleHighlightChange}
-          onBookUpdated={setViewingBookOverride}
+          onBookUpdated={applyBookUpdate}
+        />
+      ) : null}
+
+      {editBook ? (
+        <BookForm
+          selectedBook={editBook}
+          formData={formData}
+          setFormData={setFormData}
+          onClose={() => {
+            if (isSavingBook) return;
+            setEditBook(null);
+          }}
+          onSave={handleBookFormSave}
+          onImageUpload={handleBookImageUpload}
+          isSaving={isSavingBook}
         />
       ) : null}
     </div>

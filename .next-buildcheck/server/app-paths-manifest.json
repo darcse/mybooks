@@ -6,6 +6,7 @@
   "/api/monthly-review-comment/route": "app/api/monthly-review-comment/route.js",
   "/archive/[year]/[month]/page": "app/archive/[year]/[month]/page.js",
   "/archive/page": "app/archive/page.js",
+  "/books/highlights/[bookId]/page": "app/books/highlights/[bookId]/page.js",
   "/books/highlights/page": "app/books/highlights/page.js",
   "/books/page": "app/books/page.js",
   "/comics/page": "app/comics/page.js",

@@ -421,18 +421,11 @@ export function PhotobookLibraryContent() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-8 sm:px-6">
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex items-center gap-3">
         <h1 className="flex items-center gap-2 text-2xl font-medium text-ink">
           <Camera className="size-7 shrink-0 text-mute" strokeWidth={1.5} />
           Photobook
         </h1>
-        <button
-          type="button"
-          onClick={() => setModelModalOpen(true)}
-          className="inline-flex h-[34px] shrink-0 items-center rounded-md border border-hairline bg-surface-elevated px-4 text-sm font-medium text-body hover:text-ink"
-        >
-          모델
-        </button>
       </div>
 
       {isAuthenticated && (
@@ -508,6 +501,7 @@ export function PhotobookLibraryContent() {
             libraryEmpty={library.length === 0}
             onAuthorClick={handleAuthorClick}
             onItemClick={handleItemClick}
+            onModelClick={() => setModelModalOpen(true)}
         />
       )}
     </div>
