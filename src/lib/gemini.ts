@@ -37,7 +37,7 @@ export async function generateBookStatsYearComment(
   books: { title: string; author: string | null; category: string }[]
 ): Promise<string | null> {
   if (books.length === 0) return null;
-  const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash-lite' });
   const list = books
     .map((b) => `- ${b.title} | ${b.author ?? ''} | ${b.category}`)
     .join('\n');
@@ -91,7 +91,7 @@ export async function generateBookReadingRecommendations(
       : '';
   const user = `완독한 도서 목록:\n${finishedLines}\n\n보유 중 미독서 도서 목록:\n${unreadLines}\n\n위 이력을 바탕으로 다음에 읽을 책을 추천해줘.${ownedExactHint}`;
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3.1-flash-lite-preview',
+    model: 'gemini-3.5-flash-lite',
     tools: [{ googleSearch: {} }] as unknown as Parameters<typeof genAI.getGenerativeModel>[0]['tools'],
     systemInstruction: system,
   });
@@ -137,7 +137,7 @@ export async function generateMonthlyReviewComment(
   if (!trimmed) return null;
   const user = `${year}년 ${month}월 활동:\n${trimmed}`;
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3.1-flash-lite-preview',
+    model: 'gemini-3.5-flash-lite',
     systemInstruction,
   });
   try {

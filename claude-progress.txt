@@ -61,4 +61,4 @@
 [2026-07-20] [Cursor] 도서 모달→하이라이트 화면 링크(bookId 쿼리 필터) | passes: 변경 없음
 [2026-07-20] [Cursor] 도서 모달 하이라이트 바로가기 — 하이라이트 있는 도서만 표시 | passes: 변경 없음
 [2026-07-20] [Cursor] Claude 해설 프롬프트 — 제목/헤더 없이 본문만 출력 지시 추가 | passes: 변경 없음
-[2026-07-21] [Cursor] 포토북 모델 버튼을 필터 버튼 앞(Souls 검색줄)으로 이동 | passes: 변경 없음
+[2026-07-28] [Cursor] Gemini 모델 gemini-3.5-flash-lite로 업데이트 | passes: 변경 없음

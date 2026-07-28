@@ -12,7 +12,7 @@
 - Framework: Next.js 15 App Router + TailwindCSS v4
 - Database: Supabase (Auth + PostgreSQL + RLS) — mylibrary와 동일 인스턴스 공유
 - Deployment: Vercel
-- AI: Gemini API (`gemini-3.1-flash-lite-preview`)
+- AI: Gemini API (`gemini-3.5-flash-lite`)
 - External API: 알라딘 TTB
 - Font: Inter (ss03 feature flag 필수)
 

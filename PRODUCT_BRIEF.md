@@ -16,7 +16,7 @@ mybooks는 개인이 보유하거나 감상한 도서·코믹스·포토북을 �
 - Font: Inter (font-feature-settings: "calt", "kern", "liga", "ss03" 전역 적용)
 - DB/Auth/Storage: Supabase PostgreSQL, Supabase Auth, @supabase/ssr
 - 배포: Vercel
-- AI: Gemini API (`gemini-3.1-flash-lite-preview`)
+- AI: Gemini API (`gemini-3.5-flash-lite`)
 - 외부 API: 알라딘 TTB
 - 주요 라이브러리: lucide-react, sonner, react-markdown, recharts
 
