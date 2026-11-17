@@ -10,71 +10,67 @@
 ## 기술 스택
 
 - Framework: Next.js 15 App Router + TailwindCSS v4
-- Database: Supabase (Auth + PostgreSQL + RLS) — mylibrary와 동일 인스턴스 공유
+- Database: Supabase (Auth + PostgreSQL + RLS) — 형제 앱 myaudio와 동일 인스턴스 공유
 - Deployment: Vercel
-- AI: Gemini API (`gemini-3.5-flash-lite`)
+- AI:
+  - Claude (`claude-sonnet-5`, `lib/anthropic.ts`) — 하이라이트 AI 해설 (`/api/highlight-explanation`)
+  - Gemini (`gemini-3.5-flash-lite`, `lib/gemini.ts`) — 도서 추천, 연도별 독서 통계 코멘트, 월간 리뷰 코멘트
 - External API: 알라딘 TTB
 - Font: Inter (ss03 feature flag 필수)
+- dev 런처: Tauri 웹뷰(macOS). JW가 띄우며 에이전트는 실행·종료하지 않는다
 
 ---
 
 ## 폴더 구조
+
+라우트별 `_components/` 패턴을 쓴다. 해당 라우트 전용 컴포넌트는 그 라우트의 `_components/`에 둔다.
 
 ```
 mybooks/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx
-│   │   ├── page.tsx              # 대시보드
+│   │   ├── page.tsx                  # 대시보드
 │   │   ├── globals.css
+│   │   ├── _components/              # 대시보드 전용
 │   │   ├── login/page.tsx
 │   │   ├── books/
-│   │   │   ├── page.tsx
-│   │   │   └── highlights/page.tsx
-│   │   ├── comics/page.tsx
-│   │   ├── photobook/page.tsx
+│   │   │   ├── page.tsx, actions.ts, types.ts, constants.ts, utils.ts
+│   │   │   ├── _components/
+│   │   │   └── highlights/
+│   │   │       ├── page.tsx
+│   │   │       ├── _components/
+│   │   │       └── [bookId]/page.tsx
+│   │   ├── comics/                   # page.tsx, actions.ts, types.ts, constants.ts, _components/
+│   │   ├── photobook/                # page.tsx, actions.ts, types.ts, constants.ts, utils.ts, _components/
 │   │   ├── archive/
-│   │   │   ├── page.tsx
-│   │   │   └── [year]/[month]/page.tsx
+│   │   │   ├── page.tsx, yearStats.ts, _components/
+│   │   │   └── [year]/[month]/       # page.tsx, _components/
 │   │   └── api/
 │   │       ├── book-recommend/route.ts
 │   │       ├── book-stats-comment/route.ts
+│   │       ├── highlight-explanation/route.ts
 │   │       └── monthly-review-comment/route.ts
-│   ├── components/
-│   │   ├── ui/
-│   │   ├── layout/
-│   │   └── features/
+│   ├── components/                   # 공용: AladinSearchSection, AsyncMutationUi, layout/
+│   ├── hooks/useAuthState.ts
 │   ├── lib/
-│   │   ├── supabase/
-│   │   │   ├── client.ts
-│   │   │   └── server.ts
-│   │   ├── aladin.ts
-│   │   └── utils.ts
-│   ├── hooks/
-│   └── types/
-│       └── index.ts
-├── feature_list/
-│   ├── SETUP.json
-│   ├── BOOK.json
-│   ├── COMICS.json
-│   ├── PHOTO.json
-│   ├── UX.json
-│   ├── AUTH.json
-│   └── BUG.json
-├── .env.local
-├── CLAUDE.md
-├── AGENTS.md
-├── HARNESS.md
-├── CONVENTIONS.md
-├── claude-progress.txt
-└── Codex-progress.txt
+│   │   ├── supabase/client.ts, server.ts
+│   │   ├── aladin.ts, anthropic.ts, gemini.ts
+│   │   └── theme.ts, format.ts
+│   ├── middleware.ts
+│   └── proxy.ts
+├── feature_list/                     # BOOK, BUG, COMICS, PHOTOBOOK, SETUP, UX (.json)
+├── docs/tasks/                       # 지난 TASK.json 보관
+├── TASK.json                         # 현재 작업 지시 1건
+├── AGENTS.md, CLAUDE.md, HARNESS.md, CONVENTIONS.md
+└── DESIGN.md
 ```
 
 ---
 
 ## DB 테이블
 
-mylibrary와 동일한 Supabase 인스턴스를 공유한다.
+형제 앱 myaudio와 동일한 Supabase 인스턴스를 공유한다.
 별도 prefix 없음 — 이 앱에서 사용하는 테이블만 접근한다.
 
 ### 사용 테이블
@@ -86,11 +82,23 @@ mylibrary와 동일한 Supabase 인스턴스를 공유한다.
 | `photobook` | 포토북 컬렉션 |
 | `book_highlights` | 도서 하이라이트 |
 | `book_stats_comments` | 연도별 독서 통계 Gemini 코멘트 캐시 |
-| `monthly_review_comments` | 월별 Archive Gemini 코멘트 캐시 |
+| `monthly_review_comments` | 월별 Archive Gemini 코멘트 캐시 (myaudio와 공용, `app` 컬럼으로 구분) |
 
-### 접근하지 않는 테이블 (myaudio 전용)
+### monthly_review_comments 공용 규칙
 
-`album`, `headfi`, `lyrics`, `album_listen_history`, `album_mood_groups`, `album_moods`
+- myaudio와 같은 테이블을 `app` 컬럼으로 구분한다. upsert 키는 `(year, month, app)`이다.
+- mybooks의 조회·저장 쿼리는 항상 `app` 조건을 건다.
+
+### 접근하지 않는 테이블·버킷 (myaudio 전용)
+
+- 앨범: `album`, `artists`, `album_listen_history`, `album_mood_groups`, `album_moods`
+- 헤드파이: `headfi`, `headfi_combos`, `headfi_sales`, `headfi_accessories`, `headfi_accessory_links`, `headfi_device_settings`, `headfi_match_cache`
+- 가사: `lyrics`, `lyrics_translations`, `lyrics_translation_tracks`
+- Storage 버킷: `lyrics-audio`, `lyrics-covers`, `headfi-fr`
+
+### 공용 요소 변경 주의
+
+`auth.users`, user_id 기반 RLS, `monthly_review_comments`를 바꿀 때는 myaudio에 영향이 없는지 먼저 확인한다. 영향이 있으면 구현하지 말고 TASK.json result에 보고한다.
 
 ---
 
@@ -100,24 +108,26 @@ mylibrary와 동일한 Supabase 인스턴스를 공유한다.
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 GEMINI_API_KEY=
+ANTHROPIC_API_KEY=
 ALADIN_TTB_KEY=
+NAVER_CLIENT_ID=        # 선택
+NAVER_CLIENT_SECRET=    # 선택
 ```
 
-주의: 알라딘 키는 `ALADIN_TTB_KEY` (서버 전용, NEXT_PUBLIC_ 없음)
+주의: 알라딘·Gemini·Anthropic 키는 서버 전용 (NEXT_PUBLIC_ 없음)
 
 ---
 
 ## feature_list/ ID 규칙
 
-| prefix | 카테고리 |
-|--------|----------|
-| `SETUP-` | 프로젝트 초기 세팅 |
-| `BOOK-` | 도서 |
-| `COMICS-` | 코믹스 |
-| `PHOTO-` | 포토북 |
-| `UX-` | 공통 UX / 레이아웃 |
-| `AUTH-` | 인증 |
-| `BUG-` | 버그 수정 |
+| prefix | 카테고리 | 파일 |
+|--------|----------|------|
+| `SETUP-` | 프로젝트 초기 세팅, 인프라 | SETUP.json |
+| `BOOK-` | 도서, 하이라이트, 독서 통계, 도서 추천 | BOOK.json |
+| `COMICS-` | 코믹스 | COMICS.json |
+| `PHOTO-` | 포토북 | PHOTOBOOK.json |
+| `UX-` | 공통 UX, 레이아웃, 테마, 네비게이션, 인증 흐름 | UX.json |
+| `BUG-` | 버그 수정 | BUG.json |
 
 ---
 
@@ -127,12 +137,14 @@ ALADIN_TTB_KEY=
 - 서버 컴포넌트 기본, 인터랙션 필요 시 `use client`
 - props 타입은 인터페이스로 별도 정의
 - 모달 상태 관리: stale state 방지를 위해 API 응답 후 `setViewingItem`과 `setLibrary` 동시 업데이트
+- `window.confirm` / `alert` / `prompt` 사용 금지 — Tauri 웹뷰에서 깨질 수 있으므로 인라인 확인 UI를 쓴다
 
 ---
 
-## AI (Gemini) 규칙
+## AI 규칙
 
-- Gemini API 호출은 반드시 try/catch로 감싼다
+- Claude·Gemini API 호출은 반드시 try/catch로 감싼다
+- 하이라이트 AI 해설(Claude)은 `book_highlights.ai_explanation`에 저장하고 재생성·삭제를 지원한다
 - `withRetry` 헬퍼로 429 에러 처리 (retry delay는 에러 메시지에서 파싱)
 - AI 편향 방지: 후보 아이템 전달 전 random shuffle + slice 적용
 - 응답 JSON이 markdown 코드블록으로 감싸진 경우 파싱 전 제거
