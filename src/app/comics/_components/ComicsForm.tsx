@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
-import { InlineSpinner, SavingLabel } from '@/components/AsyncMutationUi';
+import { SavingLabel } from '@/components/AsyncMutationUi';
+import { InlineDeleteConfirm } from '@/components/InlineDeleteConfirm';
 import { categoryOptions } from '../constants';
 import type { SelectedComic } from '../types';
 
@@ -234,17 +234,14 @@ export function ComicsForm({
             )}
           </button>
           {isEditing && onDelete && (
-            <button
-              type="button"
-              className="flex flex-[1] items-center justify-center rounded-full border border-hairline bg-surface-elevated text-body hover:text-ink disabled:opacity-60"
-              onClick={onDelete}
-              disabled={isSaving || isDeleting}
-              aria-label="만화책 삭제"
-              title="삭제"
-              aria-busy={isDeleting}
-            >
-              {isDeleting ? <InlineSpinner /> : <Trash2 className="size-4" strokeWidth={1.8} />}
-            </button>
+            <InlineDeleteConfirm
+              variant="footer"
+              message={'정말 이 만화책을 라이브러리에서 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.'}
+              onConfirm={onDelete}
+              isBusy={isDeleting}
+              disabled={isSaving}
+              ariaLabel="만화책 삭제"
+            />
           )}
         </div>
       </div>

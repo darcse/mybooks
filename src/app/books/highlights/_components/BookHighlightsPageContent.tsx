@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Check, ChevronUp, Pencil, Plus, RefreshCw, Sparkles, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { InlineDeleteConfirm } from '@/components/InlineDeleteConfirm';
 import { createClient } from '@/lib/supabase/client';
 import { formatAuthorName } from '@/lib/format';
 import { BookDetailModal } from '../../_components/BookDetailModal';
@@ -461,7 +462,6 @@ export function BookHighlightsPageContent({
   };
 
   const handleDelete = async (item: BookHighlightListItem) => {
-    if (!confirm('이 하이라이트를 삭제하시겠습니까?')) return;
     setDeletingId(item.id);
     try {
       await deleteBookHighlight(item.id, item.book_id);
@@ -801,16 +801,13 @@ export function BookHighlightsPageContent({
                           >
                             <Pencil className="size-4" strokeWidth={1.8} />
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-50"
-                            disabled={deletingId === item.id}
-                            aria-label="하이라이트 삭제"
-                            title="삭제"
-                          >
-                            <Trash2 className="size-4" strokeWidth={1.8} />
-                          </button>
+                          <InlineDeleteConfirm
+                            key={`highlight-delete-${item.id}`}
+                            message="이 하이라이트를 삭제하시겠습니까?"
+                            onConfirm={() => handleDelete(item)}
+                            isBusy={deletingId === item.id}
+                            ariaLabel="하이라이트 삭제"
+                          />
                         </>
                       )}
                     </div>

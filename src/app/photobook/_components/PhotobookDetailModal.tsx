@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BookOpen, FileText, Pencil, Trash2 } from 'lucide-react';
-import { InlineSpinner } from '@/components/AsyncMutationUi';
+import { BookOpen, FileText, Pencil } from 'lucide-react';
+import { InlineDeleteConfirm } from '@/components/InlineDeleteConfirm';
 import type { Photobook, SameModelPhotobookItem } from '../types';
 import { displayPhotobookCategory, displayPhotobookStatus } from '../utils';
 import { SameModelPhotobooks } from './SameModelPhotobooks';
@@ -207,17 +207,13 @@ export function PhotobookDetailModal({
             >
               <Pencil className="size-4" strokeWidth={1.8} />
             </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              disabled={isDeleting}
-              className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-60"
-              aria-label="삭제"
-              title="삭제"
-              aria-busy={isDeleting}
-            >
-              {isDeleting ? <InlineSpinner /> : <Trash2 className="size-4" strokeWidth={1.8} />}
-            </button>
+            <InlineDeleteConfirm
+              key={`photobook-delete-${viewingPhotobook.id}`}
+              message={'정말 이 사진집을 라이브러리에서 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.'}
+              onConfirm={onDelete}
+              isBusy={isDeleting}
+              ariaLabel="삭제"
+            />
           </div>
         )}
       </div>

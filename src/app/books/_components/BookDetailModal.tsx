@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookMarked, BookOpen, Bookmark, Check, FileText, Pencil, Trash2, X } from 'lucide-react';
+import { BookMarked, BookOpen, Bookmark, Check, FileText, Pencil, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { InlineSpinner, SavingLabel } from '@/components/AsyncMutationUi';
+import { SavingLabel } from '@/components/AsyncMutationUi';
+import { InlineDeleteConfirm } from '@/components/InlineDeleteConfirm';
 import { formatAuthorName } from '@/lib/format';
 import {
   createBookHighlight,
@@ -265,7 +266,6 @@ export function BookDetailModal({
   };
 
   const handleDeleteHighlight = async (highlightId: number) => {
-    if (!confirm('이 하이라이트를 삭제하시겠습니까?')) return;
     try {
       await deleteBookHighlight(highlightId, viewingBook.id);
       setHighlights((prev) => prev.filter((item) => item.id !== highlightId));
@@ -499,17 +499,13 @@ export function BookDetailModal({
                 >
                   <Pencil className="size-4" strokeWidth={1.8} />
                 </button>
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  disabled={isDeleting}
-                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink disabled:opacity-60"
-                  aria-label="삭제"
-                  title="삭제"
-                  aria-busy={isDeleting}
-                >
-                  {isDeleting ? <InlineSpinner /> : <Trash2 className="size-4" strokeWidth={1.8} />}
-                </button>
+                <InlineDeleteConfirm
+                  key={`book-delete-${viewingBook.id}`}
+                  message={'정말 이 도서를 라이브러리에서 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.'}
+                  onConfirm={onDelete}
+                  isBusy={isDeleting}
+                  ariaLabel="삭제"
+                />
               </div>
             )}
           </>
@@ -649,15 +645,12 @@ export function BookDetailModal({
                                 >
                                   <Pencil className="size-4" strokeWidth={1.8} />
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteHighlight(highlight.id)}
-                                  className="inline-flex items-center justify-center rounded-md border border-hairline p-2 text-body hover:text-ink"
-                                  aria-label="하이라이트 삭제"
-                                  title="삭제"
-                                >
-                                  <Trash2 className="size-4" strokeWidth={1.8} />
-                                </button>
+                                <InlineDeleteConfirm
+                                  key={`highlight-delete-${highlight.id}`}
+                                  message="이 하이라이트를 삭제하시겠습니까?"
+                                  onConfirm={() => handleDeleteHighlight(highlight.id)}
+                                  ariaLabel="하이라이트 삭제"
+                                />
                               </>
                             )}
                           </div>

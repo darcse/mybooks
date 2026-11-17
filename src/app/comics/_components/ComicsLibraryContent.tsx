@@ -247,7 +247,6 @@ export function ComicsLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
-    if (!confirm('정말 이 만화책을 라이브러리에서 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
     setIsDeleting(true);
     try {
       await deleteComicFromDB(viewingComic.id);
@@ -267,7 +266,6 @@ export function ComicsLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
-    if (!confirm('정말 이 만화책을 라이브러리에서 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
     setIsDeleting(true);
     try {
       await deleteComicFromDB(Number(selectedComic.id));
