@@ -5,11 +5,17 @@ import { formatPubDate } from '@/lib/format';
 import {
   searchAladinBooks as searchAladinBooksLib,
   getAladinItemByIsbn as getAladinItemByIsbnLib,
-} from '@/lib/aladin';
+  type SearchAladinOptions,
+} from '@/lib/yes24';
 import type { Book, BookHighlight } from './types';
 
-export async function searchAladinBooks(query: string, page: number = 1, display: number = 15) {
-  return searchAladinBooksLib(query, page, display);
+export async function searchAladinBooks(
+  query: string,
+  page: number = 1,
+  display: number = 15,
+  options?: SearchAladinOptions,
+) {
+  return searchAladinBooksLib(query, page, display, options);
 }
 
 export async function getAladinItemByIsbn(isbn: string) {

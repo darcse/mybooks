@@ -37,6 +37,7 @@ export interface AladinSearchBookItem {
   discount?: string;
   image?: string;
   total_pages?: string;
+  is_adult?: boolean;
   [key: string]: unknown;
 }
 

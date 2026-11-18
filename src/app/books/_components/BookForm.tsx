@@ -269,7 +269,7 @@ export function BookForm({
               rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="알라딘 API에서 불러오거나 직접 입력"
+              placeholder="검색에서 불러오거나 직접 입력"
             />
           </div>
           <div className="col-span-2">

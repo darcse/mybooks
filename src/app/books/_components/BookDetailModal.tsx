@@ -347,7 +347,16 @@ export function BookDetailModal({
                   rel="noopener noreferrer"
                   className="break-all text-ink underline underline-offset-4"
                 >
-                  도서 정보
+                  {(() => {
+                    try {
+                      const host = new URL(viewingBook.link).hostname.toLowerCase();
+                      return host === 'yes24.com' || host.endsWith('.yes24.com')
+                        ? 'YES24에서 보기'
+                        : '도서 정보';
+                    } catch {
+                      return '도서 정보';
+                    }
+                  })()}
                 </a>
               </p>
             )}

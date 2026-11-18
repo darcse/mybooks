@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
-import { ALADIN_SEARCH_DISPLAY } from '@/lib/aladin';
+import { ALADIN_SEARCH_DISPLAY } from '@/lib/yes24';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import {
@@ -141,10 +141,16 @@ export function ComicsLibraryContent() {
     setIsSearching(true);
     try {
       const result = await searchAladinBooks(query, 1, ALADIN_SEARCH_DISPLAY);
+      if (result.error) {
+        setSearchItems([]);
+        setTotalResults(0);
+        toast.error(result.error);
+        return;
+      }
       setSearchItems(result.items || []);
       setTotalResults(result.total ?? 0);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : '검색 중 오류가 발생했습니다.');
+    } catch {
+      toast.error('검색 중 오류가 발생했습니다.');
     } finally {
       setIsSearching(false);
     }
@@ -193,7 +199,7 @@ export function ComicsLibraryContent() {
       rank: 0,
       bookmark: '',
       memo: '',
-      is_adult: false,
+      is_adult: !!item.is_adult,
     });
     if (isbn) {
       getAladinItemByIsbn(isbn)

@@ -89,19 +89,25 @@ export function AladinSearchSection({
       )}
       {!isSearching && items.length > 0 && (
         <div className="mb-8 rounded-sm border border-hairline bg-surface p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <span className="flex items-center gap-2 text-sm font-medium text-body">
               <Search className={iconClass} />
-              알라딘 검색 결과 (총 {totalResults.toLocaleString()}건)
+              YES24 검색 결과 (총 {totalResults.toLocaleString()}건)
             </span>
+            <span className="text-xs text-mute">도서 정보 제공: YES24</span>
           </div>
           <ul className="mb-4 grid gap-2">
-            {items.map((item, i) => (
+            {items.map((item, i) => {
+              const link =
+                typeof item.link === 'string' && item.link.trim() !== ''
+                  ? item.link.trim()
+                  : null;
+              return (
               <li
                 key={i}
                 className="flex items-center justify-between rounded-sm border border-hairline bg-surface-elevated p-4"
               >
-                <div className="flex-1 pr-4">
+                <div className="min-w-0 flex-1 pr-4">
                   <h3
                     className="text-lg font-medium text-ink"
                     dangerouslySetInnerHTML={{ __html: String(item.title ?? '') }}
@@ -122,6 +128,17 @@ export function AladinSearchSection({
                       {item.pubdate ? String(item.pubdate).substring(0, 4) + '년' : '발매일 미상'}
                     </span>
                   </div>
+                  {link ? (
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-block text-xs text-mute underline underline-offset-4 hover:text-body"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      YES24에서 보기
+                    </a>
+                  ) : null}
                 </div>
                 {isAuthenticated && (
                   <button
@@ -133,7 +150,8 @@ export function AladinSearchSection({
                   </button>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       )}

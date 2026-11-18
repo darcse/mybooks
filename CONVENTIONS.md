@@ -15,7 +15,7 @@
 - AI:
   - Claude (`claude-sonnet-5`, `lib/anthropic.ts`) — 하이라이트 AI 해설 (`/api/highlight-explanation`)
   - Gemini (`gemini-3.5-flash-lite`, `lib/gemini.ts`) — 도서 추천, 연도별 독서 통계 코멘트, 월간 리뷰 코멘트
-- External API: 알라딘 TTB
+- External API: YES24 Open API (도서 검색·상세, 서버 전용 키 `YES24_API_KEY`)
 - Font: Inter (ss03 feature flag 필수)
 - dev 런처: Tauri 웹뷰(macOS). JW가 띄우며 에이전트는 실행·종료하지 않는다
 
@@ -55,7 +55,7 @@ mybooks/
 │   ├── hooks/useAuthState.ts
 │   ├── lib/
 │   │   ├── supabase/client.ts, server.ts
-│   │   ├── aladin.ts, anthropic.ts, gemini.ts
+│   │   ├── yes24.ts, anthropic.ts, gemini.ts
 │   │   └── theme.ts, format.ts
 │   ├── middleware.ts
 │   └── proxy.ts
@@ -109,12 +109,10 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 GEMINI_API_KEY=
 ANTHROPIC_API_KEY=
-ALADIN_TTB_KEY=
-NAVER_CLIENT_ID=        # 선택
-NAVER_CLIENT_SECRET=    # 선택
+YES24_API_KEY=
 ```
 
-주의: 알라딘·Gemini·Anthropic 키는 서버 전용 (NEXT_PUBLIC_ 없음)
+주의: YES24·Gemini·Anthropic 키는 서버 전용 (NEXT_PUBLIC_ 없음)
 
 ---
 
@@ -138,6 +136,18 @@ NAVER_CLIENT_SECRET=    # 선택
 - props 타입은 인터페이스로 별도 정의
 - 모달 상태 관리: stale state 방지를 위해 API 응답 후 `setViewingItem`과 `setLibrary` 동시 업데이트
 - `window.confirm` / `alert` / `prompt` 사용 금지 — Tauri 웹뷰에서 깨질 수 있으므로 인라인 확인 UI를 쓴다
+
+---
+
+## YES24 Open API 이용 규칙 (이용약관 기준)
+
+- 호출은 서버 코드에서만 하고 키는 `YES24_API_KEY` 환경변수로만 읽는다. 키 값을 로그·응답·문서에 남기지 않는다.
+- 이 키는 mybooks 전용이다. 다른 앱(myaudio 등)과 공유하지 않는다.
+- 검색 결과 화면에 출처를 표기("YES24")하고, 상품별 YES24 상세 링크를 제공한다. 로고·브랜드 색상은 쓰지 않는다(제휴로 오인 금지).
+- 사용자가 직접 선택한 도서만 한 권씩 저장한다. 대량·체계적 수집, 별도 DB 구축, 재배포·재판매 금지.
+- 무료 API라 예고 후 변경·중단될 수 있다. 공급자 교체가 쉬운 구조(`lib/yes24.ts` 어댑터)와 수기 등록 폴백을 유지한다.
+- 호출 한도: 기본키 초당 10회, 하루 20,000회. 429 응답은 사용자에게 "잠시 후 다시 시도" 안내.
+- 자세한 조사 내용: `docs/research/yes24-api.md`
 
 ---
 

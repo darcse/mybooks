@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
 import { generateBookReadingRecommendations } from '@/lib/gemini';
-import { searchAladinBooks } from '@/lib/aladin';
+import { searchAladinBooks, yes24SearchFallbackUrl } from '@/lib/yes24';
 import { getOwnershipStatus } from '@/app/books/utils';
 import type { Book } from '@/app/books/types';
 
@@ -36,10 +36,6 @@ function bestUnreadMatch(books: Book[], title: string, author: string): Book | n
     }
   }
   return hi >= 500 ? best : null;
-}
-
-function aladinSearchFallbackUrl(title: string): string {
-  return `https://www.aladin.co.kr/search/wsearchresult.aspx?SearchTarget=Book&KeyWord=${encodeURIComponent(title.trim())}`;
 }
 
 export async function POST() {
@@ -93,14 +89,16 @@ export async function POST() {
     const ownedTitle = matched ? matched.title : raw.owned.title;
     const ownedAuthor = matched ? (matched.author ?? '') : raw.owned.author;
 
-    let detail_url = aladinSearchFallbackUrl(raw.external.title);
+    let detail_url = yes24SearchFallbackUrl(raw.external.title);
     const q = `${raw.external.title} ${raw.external.author}`.trim().slice(0, 120);
     if (q) {
       try {
-        const { items } = await searchAladinBooks(q);
-        const link = items[0]?.link;
-        if (typeof link === 'string' && link.trim() !== '') {
-          detail_url = link.trim().replace(/^http:\/\//i, 'https://');
+        const { items, error } = await searchAladinBooks(q);
+        if (!error) {
+          const link = items[0]?.link;
+          if (typeof link === 'string' && link.trim() !== '') {
+            detail_url = link.trim().replace(/^http:\/\//i, 'https://');
+          }
         }
       } catch {
         /* fallback URL */

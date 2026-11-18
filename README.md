@@ -2,7 +2,7 @@
 
 mybooks는 개인이 보유하고 감상한 **도서(Books), 코믹스(Comics), 포토북(Photobook)**을 한곳에서 체계적으로 등록, 검색, 분류하고, **독서 진행도와 하이라이트(Highlights), 연간/월간 아카이브(Archive)**를 통해 독서 맥락을 영구 축적하는 프리미엄 개인 라이브러리 웹 애플리케이션입니다.
 
-본 애플리케이션은 **알라딘 Open API(TTB)**를 연동하여 도서 메타데이터를 자동화하고, **Anthropic Claude(claude-sonnet-5)** 및 **Google Gemini(gemini-3.5-flash-lite)** 다중 AI 모델을 깊이 있게 결합하여 하이라이트 문장 심층 인문 해설, 완독 기반 맞춤 도서 추천, 연간·월간 독서 통계 코멘트 분석 기능을 제공합니다.
+본 애플리케이션은 **YES24 Open API**를 연동하여 도서 메타데이터를 자동화하고, **Anthropic Claude(claude-sonnet-5)** 및 **Google Gemini(gemini-3.5-flash-lite)** 다중 AI 모델을 깊이 있게 결합하여 하이라이트 문장 심층 인문 해설, 완독 기반 맞춤 도서 추천, 연간·월간 독서 통계 코멘트 분석 기능을 제공합니다.
 
 ---
 
@@ -20,7 +20,7 @@ mybooks는 개인이 보유하고 감상한 **도서(Books), 코믹스(Comics), 
     *   **Anthropic Claude**: `claude-sonnet-5` (인문·역사·사회·철학 하이라이트 문장 심층 AI 해설)
     *   **Google Gemini**: `gemini-3.5-flash-lite` (완독 이력 기반 도서 추천 + Google Search Grounding, 연도별 독서 통계 코멘트, 월별 아카이브 리뷰 코멘트)
 *   **External APIs**:
-    *   **알라딘 TTB Open API**: 도서/만화/화보 실시간 검색 및 메타데이터 자동 완성
+    *   **YES24 Open API**: 도서/만화/화보 실시간 검색 및 메타데이터 자동 완성
     *   **Wikipedia API**: 포토북 모달 내 모델명 기반 일본어 위키피디아 서머리 및 썸네일 조회
 *   **Icons & UI Utilities**: Lucide React, Sonner (Toast Provider), React Markdown
 
@@ -66,14 +66,14 @@ mybooks/
 │   │       ├── highlight-explanation/  # Claude Sonnet 5 하이라이트 심층 해설
 │   │       └── monthly-review-comment/ # Gemini 월간 종합 리뷰 코멘트 생성/캐싱
 │   ├── components/             # 공용 UI 컴포넌트
-│   │   ├── AladinSearchSection.tsx     # 알라딘 TTB 검색 공통 컴포넌트
+│   │   ├── AladinSearchSection.tsx     # YES24 검색 공통 컴포넌트
 │   │   ├── AsyncMutationUi.tsx         # 비동기 상태 피드백 UI
 │   │   └── layout/             # Navigation, ThemeAwareToaster
 │   ├── hooks/
 │   │   └── useAuthState.ts     # Supabase 클라이언트 인증 상태 구독 훅
 │   ├── lib/
 │   │   ├── supabase/           # Supabase 클라이언트 (client.ts, server.ts)
-│   │   ├── aladin.ts           # 알라딘 TTB Open API 통신 헬퍼
+│   │   ├── yes24.ts            # YES24 Open API 통신 헬퍼
 │   │   ├── anthropic.ts        # Anthropic Claude SDK 및 프롬프트 헬퍼
 │   │   ├── gemini.ts           # Google Gemini AI SDK 및 프롬프트 헬퍼
 │   │   ├── theme.ts            # 라이트/다크/자동 테마 관리 유틸리티
@@ -82,8 +82,7 @@ mybooks/
 │   └── proxy.ts                # Supabase SSR 세션 갱신 프록시
 ├── feature_list/               # 하네스 검증 명세서 (BOOK, COMICS, PHOTO, UX 등)
 ├── CONVENTIONS.md              # 코딩 컨벤션 및 도메인 규칙
-├── HARNESS.md                  # 하네스 운용 및 dev/build 서버 규칙
-└── Codex-progress.txt          # 개발 작업 로그
+└── HARNESS.md                  # 하네스 운용 및 dev/build 서버 규칙
 ```
 
 ---
@@ -128,8 +127,8 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 *   **다각도 검색 & 필터링**:
     *   카테고리(총류, 철학, 종교, 사회과학, 자연과학, 기술과학, 예술, 언어, 문학, 역사 등), 보유 상태, 도서 형태, 독서 상태(미독/읽는중/완독) 필터.
     *   실시간 도서명/저자명 검색, 정렬(구입일순, 완독일순, 제목순, 별점순), 페이지네이션.
-*   **알라딘 TTB 검색 기반 도서 등록 및 관리**:
-    *   알라딘 검색창 키워드 입력으로 서지 메타데이터(제목, 저자, 출판사, 출판일, 정가, 표지, ISBN 등) 원클릭 자동 완성.
+*   **YES24 검색 기반 도서 등록 및 관리**:
+    *   YES24 검색창 키워드 입력으로 서지 메타데이터(제목, 저자, 출판사, 출판일, 정가, 표지, ISBN 등) 원클릭 자동 완성.
     *   도서 등록, 수정, 삭제의 완벽한 Server Actions 처리 및 실시간 캐시 무효화.
 *   **도서 상세 모달 (`BookDetailModal`)**:
     *   도서 정보 탭: 표지, 기본 출판 정보, 별점, 감상 메모 관리.
@@ -159,7 +158,7 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 
 ### 4.4. 코믹스 라이브러리 (Comics — `/comics`)
 
-*   알라딘 TTB 검색 연동을 통한 만화책 메타데이터 자동 완성 및 등록/수정/삭제.
+*   YES24 검색 연동을 통한 만화책 메타데이터 자동 완성 및 등록/수정/삭제.
 *   카테고리 및 보유 상태 필터링, 검색, 페이지네이션.
 *   코믹스 상세 모달을 통한 독서 진행도 및 권별 소장 메모 관리.
 
@@ -212,18 +211,14 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-# 알라딘 TTB Open API 키 (서버 전용)
-ALADIN_TTB_KEY=
+# YES24 Open API 키 (서버 전용)
+YES24_API_KEY=
 
 # Google Gemini API 키 (도서 추천 및 통계/아카이브 코멘트)
 GEMINI_API_KEY=
 
 # Anthropic Claude API 키 (하이라이트 심층 AI 해설)
 ANTHROPIC_API_KEY=
-
-# (선택) 네이버 검색 연동 키
-NAVER_CLIENT_ID=
-NAVER_CLIENT_SECRET=
 ```
 
 ### 7.2. 명령어 가이드 (Scripts)

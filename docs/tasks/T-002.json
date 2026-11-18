@@ -1,0 +1,30 @@
+{
+  "id": "T-002",
+  "goal": "알라딘 OpenAPI 종료(2026-10-30)에 대한 대체 공급자로 YES24 Open API를 쓸 수 있는지 판단할 근거가 문서 1개로 정리된다. 이번 작업은 조사만 하며 앱 동작은 달라지지 않는다.",
+  "context": "배경: 알라딘 OpenAPI가 종료되어(응답 errorCode 999) 도서·코믹스·포토북 등록 화면의 외부 검색이 모두 빈 결과로 보인다. 네이버 책 검색 API도 2026-07-31 종료라 대체 불가다. 대체 후보는 YES24 Open API(https://apis.yes24.com, 헤더 X-Api-Key, 예: GET /v1/goods/itemList?query=...&page=1&pageSize=20, 문서 https://developers.yes24.com/docs, 샘플 https://github.com/yes24-AX/yes24-openapi-samples 의 docs/api-reference.md·openapi/yes24-openapi-v1.json). 키는 .env.local의 YES24_API_KEY에 이미 있다. 현재 알라딘 연동: src/lib/aladin.ts의 searchAladinBooks(검색, 30건 단위 start 방식)와 getAladinItemByIsbn(ISBN13 상세에서 total_pages·description 조회). 검색 결과 타입 AladinSearchItem 필드는 title, author, publisher, pubdate, isbn, price, discount, link, description, image, total_pages이다. 사용처는 books/comics/photobook의 actions.ts·LibraryContent·SearchSection, src/components/AladinSearchSection.tsx, src/app/api/book-recommend/route.ts이다. 이 앱은 도서의 총 페이지 수를 독서 진행도(current_page)에 쓰므로 페이지 수 확보 방법이 핵심이다. 조사 항목: (1) YES24 검색 응답 필드 전체와 AladinSearchItem 10개 필드별 대응 여부(대응 불가는 명시). (2) 총 페이지 수·소개글이 검색 응답과 상세(ISBN) 응답 중 어디서 오는지, 상세 호출 방법과 필요한 파라미터. (3) 페이지네이션 방식(page/pageSize 상한, 전체 건수 제공 여부). (4) 호출 한도(문서 또는 응답 헤더)와 오류 응답 형식(키 오류, 한도 초과, 결과 없음, HTTP 상태 코드). (5) 실제 검색 품질: 도서(한글 인문서, 외서 번역서 등), 만화(시리즈물 권 단위), 포토북·화보(일본 모델 화보) 각각 서로 다른 검색어 3개 이상으로 호출해 결과 정확도, 표지·ISBN·페이지·출간일 누락 여부를 요약한다. (6) 성인(19금) 도서 구분 필드와 카테고리(분류) 필드가 있는지, 있다면 값의 형태. (7) 알라딘 의존 전수조사: 위 사용처별로 알라딘 응답의 어떤 필드를 쓰는지, 알라딘 전용 용어·필드가 DB 컬럼(books.* 등)이나 타입에 박혀 있는지(코드에서 읽기 전용으로 확인, DB 접속 금지), book-recommend가 검색 실패 시 어떻게 동작하는지. 결과물은 docs/research/yes24-api.md 1개 파일에 표 중심으로 정리하고, 마지막에 교체 시 걸림돌과 권장 방향(기본안)을 쓴다. 판단 여지: 호출 방법(curl, 임시 node 스크립트 등)은 자유지만 임시 파일은 /tmp에만 둔다. 총 호출은 40회 이내로 아껴 쓴다.",
+  "scope": {
+    "in": [
+      "YES24 API 실제 호출 조사",
+      "src와 문서의 읽기 전용 조사",
+      "docs/research/yes24-api.md 신규 1개 작성"
+    ],
+    "out": [
+      "src, package.json, .env*, 설정 파일 등 어떤 앱 파일도 수정하지 말 것 — 코드 수정 금지",
+      "API 키 값을 터미널 출력, result, 문서, 샘플 응답, 로그 어디에도 노출하지 말 것(키는 환경변수로만 읽는다). .env.local의 다른 값(E2E_*, Supabase 등)도 읽거나 출력하지 말 것",
+      "DB 접속·SQL 실행, Supabase 쿼리 금지. myaudio 전용 테이블·버킷 접근 금지",
+      "종료된 알라딘 API 호출 금지",
+      "라이브러리 설치(npm install) 금지",
+      "샘플 응답의 소개글은 문서에 200자 이내로만 발췌 (전문 복사 금지)",
+      "git add/commit/push 금지"
+    ]
+  },
+  "done": [
+    "docs/research/yes24-api.md가 생성되고 AladinSearchItem 10개 필드 전부에 대한 YES24 대응표(대응 불가는 '없음' 명시)가 있다",
+    "총 페이지 수의 출처(검색/상세), 페이지네이션, 호출 한도, 오류 응답 형식이 실제 호출 결과 기준으로 기록되어 있다",
+    "도서·만화·포토북 각 3개 이상 검색어의 실제 호출 결과 요약과 성인 구분·카테고리 필드 유무가 기록되어 있다",
+    "알라딘 의존 전수조사 표(파일·함수·사용 필드·DB/타입 의존 여부)와 권장 방향이 문서에 있다",
+    "git status에서 변경이 docs/research/yes24-api.md 신규와 TASK.json뿐이고, 키 값이 문서·result 어디에도 없다"
+  ],
+  "status": "done",
+  "result": "docs/research/yes24-api.md 작성 완료. YES24 실호출 38회(/tmp 스크립트). 결론: 교체 가능. pages는 detail=Y에서만 제공, discount 필드 없음(현 코드도 미사용), adultYn·goodsSortNm 존재. 문서 한도(5/s, 5k/day)와 실측 헤더(10/s, 20k/day) 불일치 기록. 포토북은 category=BOOK+키워드 없으면 음반/성인 eBook 오염. book-recommend는 알라딘 link 실패 시 알라딘 웹 폴백.\n\n검증: src 미수정. 키 값 문서/result 미포함 확인. git status 예상: docs/research/yes24-api.md(신규), TASK.json(+기존 untracked/수정만).\n\n권장: lib/yes24 어댑터로 AladinSearchItem shape 유지, 검색 detail=Y·pageSize=30, is_adult←adultYn."
+}
