@@ -16,6 +16,7 @@ import {
 } from '../actions';
 import { categoryOptions } from '../constants';
 import type { ExternalBookItem, Comic, SelectedComic } from '../types';
+import { RegisterPanelToggle } from '@/components/RegisterPanelToggle';
 import { ComicsDetailModal } from './ComicsDetailModal';
 import { ComicsForm } from './ComicsForm';
 import { ComicsList } from './ComicsList';
@@ -98,6 +99,7 @@ export function ComicsLibraryContent() {
   const [listSortOrder, setListSortOrder] = useState<SortOrder>('publish_desc');
   const [itemsPerPage] = useState(30);
   const [listCurrentPage, setListCurrentPage] = useState(1);
+  const [registerPanelOpen, setRegisterPanelOpen] = useState(false);
 
   const fetchLibrary = useCallback(async () => {
     setIsLoading(true);
@@ -168,6 +170,7 @@ export function ComicsLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
+    setRegisterPanelOpen(false);
     setSelectedComic({ isManual: true });
     setFormData(initialFormData);
   };
@@ -177,6 +180,7 @@ export function ComicsLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
+    setRegisterPanelOpen(false);
     setSelectedComic(item);
     const isbn = item.isbn ?? '';
     setFormData({
@@ -372,29 +376,45 @@ export function ComicsLibraryContent() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-8 sm:px-6">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 text-2xl font-medium text-ink">
           <BookOpen className="size-7 shrink-0 text-mute" strokeWidth={1.5} />
           Comics
         </h1>
+        {isAuthenticated ? (
+          <RegisterPanelToggle
+            open={registerPanelOpen}
+            openLabel="만화 등록"
+            onToggle={() => {
+              if (registerPanelOpen) {
+                handleClearSearch();
+                setRegisterPanelOpen(false);
+              } else {
+                setRegisterPanelOpen(true);
+              }
+            }}
+          />
+        ) : null}
       </div>
 
-      {isAuthenticated && (
-        <ComicsSearchSection
-          query={query}
-          setQuery={setQuery}
-          items={searchItems}
-          hasSearched={hasSearched}
-          totalResults={totalResults}
-          isSearching={isSearching}
-          onSearch={handleSearch}
-          onClearSearch={handleClearSearch}
-          onManualRegister={handleManualRegister}
-          onSelectItem={handleSelectItem}
-          isAuthenticated={isAuthenticated}
-          inputBaseClass={inputBaseClass}
-        />
-      )}
+      {isAuthenticated && registerPanelOpen ? (
+        <div className="mb-6 rounded-md border border-hairline bg-surface p-4">
+          <ComicsSearchSection
+            query={query}
+            setQuery={setQuery}
+            items={searchItems}
+            hasSearched={hasSearched}
+            totalResults={totalResults}
+            isSearching={isSearching}
+            onSearch={handleSearch}
+            onClearSearch={handleClearSearch}
+            onManualRegister={handleManualRegister}
+            onSelectItem={handleSelectItem}
+            isAuthenticated={isAuthenticated}
+            inputBaseClass={inputBaseClass}
+          />
+        </div>
+      ) : null}
 
       {viewingComic && (
         <ComicsDetailModal

@@ -21,6 +21,7 @@ import { BookDetailModal } from './BookDetailModal';
 import { BookForm } from './BookForm';
 import { BookList } from './BookList';
 import { BookRecommendModal, type BookRecommendPayload } from './BookRecommendModal';
+import { RegisterPanelToggle } from '@/components/RegisterPanelToggle';
 import { BookSearchSection } from './BookSearchSection';
 import { ReadingStatsModal } from './ReadingStatsModal';
 
@@ -108,6 +109,7 @@ export function BooksLibraryContent() {
   const [recommendLoading, setRecommendLoading] = useState(false);
   const [recommendData, setRecommendData] = useState<BookRecommendPayload | null>(null);
   const [recommendEmptyMessage, setRecommendEmptyMessage] = useState<string | null>(null);
+  const [registerPanelOpen, setRegisterPanelOpen] = useState(false);
 
   const [listSearchQuery, setListSearchQuery] = useState('');
   const [listCategoryFilter, setListCategoryFilter] = useState('전체');
@@ -231,6 +233,7 @@ export function BooksLibraryContent() {
       return;
     }
     clearEditParam();
+    setRegisterPanelOpen(false);
     setSelectedBook({ isManual: true });
     setFormData(initialFormData);
   };
@@ -241,6 +244,7 @@ export function BooksLibraryContent() {
       return;
     }
     clearEditParam();
+    setRegisterPanelOpen(false);
     setSelectedBook(book);
     const isbn = book.isbn ?? '';
     setFormData({
@@ -440,13 +444,13 @@ export function BooksLibraryContent() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-8 sm:px-6">
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 text-2xl font-medium text-ink">
           <BookOpen className="size-7 shrink-0 text-mute" strokeWidth={1.5} />
           Books
         </h1>
         {isAuthenticated && (
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setStatsModalOpen(true)}
@@ -510,26 +514,40 @@ export function BooksLibraryContent() {
               )}
               AI 추천
             </button>
+            <RegisterPanelToggle
+              open={registerPanelOpen}
+              openLabel="도서 등록"
+              onToggle={() => {
+                if (registerPanelOpen) {
+                  handleClearSearch();
+                  setRegisterPanelOpen(false);
+                } else {
+                  setRegisterPanelOpen(true);
+                }
+              }}
+            />
           </div>
         )}
       </div>
 
-      {isAuthenticated && (
-        <BookSearchSection
-          query={query}
-          setQuery={setQuery}
-          books={books}
-          hasSearched={hasSearched}
-          totalResults={totalResults}
-          isSearching={isSearching}
-          onSearch={handleSearch}
-          onClearSearch={handleClearSearch}
-          onManualRegister={handleManualRegister}
-          onSelectBook={handleSelectBook}
-          isAuthenticated={isAuthenticated}
-          inputBaseClass={inputBaseClass}
-        />
-      )}
+      {isAuthenticated && registerPanelOpen ? (
+        <div className="mb-6 rounded-md border border-hairline bg-surface p-4">
+          <BookSearchSection
+            query={query}
+            setQuery={setQuery}
+            books={books}
+            hasSearched={hasSearched}
+            totalResults={totalResults}
+            isSearching={isSearching}
+            onSearch={handleSearch}
+            onClearSearch={handleClearSearch}
+            onManualRegister={handleManualRegister}
+            onSelectBook={handleSelectBook}
+            isAuthenticated={isAuthenticated}
+            inputBaseClass={inputBaseClass}
+          />
+        </div>
+      ) : null}
 
       {viewingBook && (
         <BookDetailModal

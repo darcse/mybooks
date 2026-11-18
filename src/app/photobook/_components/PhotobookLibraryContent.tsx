@@ -22,6 +22,7 @@ import type {
   SelectedPhotobook,
 } from '../types';
 import { matchesPhotobookRankFilter, normalizePhotobookModelKey } from '../utils';
+import { RegisterPanelToggle } from '@/components/RegisterPanelToggle';
 import { PhotobookDetailModal } from './PhotobookDetailModal';
 import { PhotobookForm } from './PhotobookForm';
 import { PhotobookList } from './PhotobookList';
@@ -105,6 +106,7 @@ export function PhotobookLibraryContent() {
   const [itemsPerPage] = useState(20);
   const [listCurrentPage, setListCurrentPage] = useState(1);
   const [modelModalOpen, setModelModalOpen] = useState(false);
+  const [registerPanelOpen, setRegisterPanelOpen] = useState(false);
 
   const fetchLibrary = useCallback(async () => {
     setIsLoading(true);
@@ -211,6 +213,7 @@ export function PhotobookLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
+    setRegisterPanelOpen(false);
     setSelectedPhotobook({ isManual: true });
     setFormData(initialFormData);
   };
@@ -220,6 +223,7 @@ export function PhotobookLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
+    setRegisterPanelOpen(false);
     setSelectedPhotobook(item);
     const isbn = item.isbn ?? '';
     setFormData({
@@ -431,29 +435,45 @@ export function PhotobookLibraryContent() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-8 sm:px-6">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 text-2xl font-medium text-ink">
           <Camera className="size-7 shrink-0 text-mute" strokeWidth={1.5} />
           Photobook
         </h1>
+        {isAuthenticated ? (
+          <RegisterPanelToggle
+            open={registerPanelOpen}
+            openLabel="사진집 등록"
+            onToggle={() => {
+              if (registerPanelOpen) {
+                handleClearSearch();
+                setRegisterPanelOpen(false);
+              } else {
+                setRegisterPanelOpen(true);
+              }
+            }}
+          />
+        ) : null}
       </div>
 
-      {isAuthenticated && (
-        <PhotobookSearchSection
-          query={query}
-          setQuery={setQuery}
-          items={searchItems}
-          hasSearched={hasSearched}
-          totalResults={totalResults}
-          isSearching={isSearching}
-          onSearch={handleSearch}
-          onClearSearch={handleClearSearch}
-          onManualRegister={handleManualRegister}
-          onSelectItem={handleSelectItem}
-          isAuthenticated={isAuthenticated}
-          inputBaseClass={inputBaseClass}
-        />
-      )}
+      {isAuthenticated && registerPanelOpen ? (
+        <div className="mb-6 rounded-md border border-hairline bg-surface p-4">
+          <PhotobookSearchSection
+            query={query}
+            setQuery={setQuery}
+            items={searchItems}
+            hasSearched={hasSearched}
+            totalResults={totalResults}
+            isSearching={isSearching}
+            onSearch={handleSearch}
+            onClearSearch={handleClearSearch}
+            onManualRegister={handleManualRegister}
+            onSelectItem={handleSelectItem}
+            isAuthenticated={isAuthenticated}
+            inputBaseClass={inputBaseClass}
+          />
+        </div>
+      ) : null}
 
       {selectedPhotobook && (
         <PhotobookForm

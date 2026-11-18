@@ -47,6 +47,7 @@ export function ExternalBookSearchSection({
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && onSearch()}
             placeholder={placeholder}
+            autoFocus
           />
           {query && (
             <button

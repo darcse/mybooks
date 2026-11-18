@@ -1,28 +1,29 @@
 {
-  "id": "T-008",
-  "feature_id": "PHOTO-005",
-  "goal": "포토북 등록·수정 폼에서 '모델' 아래에 선택 입력 '모델명2'(영문명 등)를 입력·저장할 수 있고, 목록 검색에서 모델명2로도 포토북이 검색되며, 상세 모달에 모델명2가 표시된다.",
-  "context": "선행조건(JW가 처리): Supabase에서 photobook 테이블에 model_name2 컬럼(text, null 허용)을 추가한다. 이 작업은 DB를 건드리지 않는다. 컬럼이 이미 있다고 가정하고 구현하며, ALTER·SQL 실행은 하지 않는다. 현재 구조: 폼의 '모델' 입력이 photobook.author 컬럼이다. 동일 모델 묶음(normalizePhotobookModelKey(author))·일본어 Wikipedia 조회·모델 클릭 검색은 모두 author 기준이고 이번 작업에서 바꾸지 않는다. 모델명2는 검색용 별칭으로만 쓴다. 대상: (1) src/app/photobook/types.ts — Photobook에 model_name2?: string | null 추가. (2) src/app/photobook/actions.ts — PhotobookFormPayload와 buildPhotobookRow에 model_name2를 추가하고, trim 후 빈 문자열이면 null로 저장한다. savePhotobookToDB·updatePhotobookInDB 둘 다 반영된다. (3) src/app/photobook/_components/PhotobookForm.tsx — FormData에 model_name2 추가, '모델'(author) 입력 바로 아래에 선택 입력 '모델명2' 추가, 안내문(placeholder)은 '영문명 등 (검색용)'. renderInput의 세 번째 인자 의미(외부 검색 항목 키로 보임)를 확인해서, 외부 소스가 없는 이 필드에 부작용 없이 처리한다. (4) src/app/photobook/_components/PhotobookLibraryContent.tsx — initialFormData, photobookToFormData(수정 시 기존값 로드, null이면 빈 문자열), handleSelectItem의 setFormData(외부 검색 선택 시 빈 문자열)에 model_name2 추가하고, 목록 검색 필터(약 358~362줄)에 model_name2를 포함한다(소문자 비교, null 안전). fetchLibrary 등 조회 쿼리가 컬럼을 명시하고 있다면 model_name2가 포함되도록 한다(select('*')면 변경 불필요). (5) src/app/photobook/_components/PhotobookDetailModal.tsx — '모델:' 줄(약 102줄) 아래에 model_name2가 있을 때만 '모델명2: 값'을 같은 스타일로 표시한다. 모델명2가 비어 있으면 아무것도 표시하지 않는다. 기본안과 다르게 구현해야 할 이유가 있으면 result에 적는다. 디자인은 Raycast 규칙(CONVENTIONS.md): drop shadow 금지, accent 색상·흰색 pill CTA 추가 금지. window.confirm/alert/prompt 금지, 전체 파일 재작성 금지, 최소 수정.",
+  "id": "T-009",
+  "goal": "도서·코믹스·포토북 페이지에서 평소에는 등록용 검색창이 보이지 않고, 제목 줄 오른쪽 끝의 ＋ 아이콘 버튼을 눌렀을 때만 등록 패널(YES24 검색창 + 직접 등록하기 + 검색 결과)이 열린다. 목록 검색과 헷갈리지 않는다.",
+  "context": "현재: 세 페이지(src/app/books/_components/BooksLibraryContent.tsx, src/app/comics/_components/ComicsLibraryContent.tsx, src/app/photobook/_components/PhotobookLibraryContent.tsx)의 제목 줄 바로 아래에 로그인 시 항상 등록용 검색 섹션(BookSearchSection / ComicsSearchSection / PhotobookSearchSection, 내부는 src/components/ExternalBookSearchSection.tsx: 검색 입력, 흰색 '검색' 버튼, '직접 등록하기' 버튼, 결과 목록)이 렌더된다. Books 제목 줄은 justify-between이고 오른쪽에 '독서 기록'·'AI 추천' 버튼 묶음이 있다. Comics·Photobook 제목 줄은 h1만 있고 flex items-center gap-3이다. 기본안: (1) 각 LibraryContent에 패널 열림 상태(예: registerPanelOpen)를 두고, 로그인(isAuthenticated)일 때만 제목 줄 오른쪽 맨 끝에 ＋ 아이콘 버튼(lucide Plus, 열리면 X)을 둔다. Books는 기존 버튼 묶음의 맨 끝, Comics·Photobook은 제목 줄에 justify-between을 주어 오른쪽 끝에 둔다. 세 페이지 모양·위치가 같아야 한다. 버튼 스타일은 기존 제목 줄 보조 버튼(독서 기록·AI 추천)과 같은 계열(border hairline, bg-surface-elevated, rounded-md, hover)의 정사각 아이콘 버튼이며 높이는 그 버튼들과 맞춘다. 흰색 pill이나 accent 색은 쓰지 않는다. aria-label과 title은 '도서 등록'·'만화 등록'·'사진집 등록'(열렸을 땐 '등록 닫기'), aria-expanded를 둔다. (2) 패널이 열렸을 때만 기존 검색 섹션을 렌더한다. 패널 모양은 제목 줄 아래의 카드(CONVENTIONS.md 기준: 1px hairline 테두리, bg-surface, rounded 6px, 패딩 16px, drop shadow 금지)로 감싸고 아래 간격은 기존과 비슷하게 유지한다. 패널이 열리면 검색 입력에 자동 포커스한다(검색 섹션이 열릴 때 마운트되므로 input의 autoFocus 정도로 충분, 에이전트 판단). (3) 닫기 동작: ＋/X 버튼으로 닫을 때는 기존 handleClearSearch()로 검색어·결과를 초기화한다. 직접 등록하기(handleManualRegister) 또는 검색 결과 선택으로 등록 폼이 열릴 때는 패널만 닫고 검색 상태는 유지한다(폼을 취소하고 다시 열면 직전 결과가 보이도록). 등록 저장 완료 시에는 기존 코드의 handleClearSearch() 호출이 그대로 동작하며 패널도 닫혀 있어야 한다. 기존 검색·선택·폼 채움·저장 로직은 바꾸지 않는다. (4) 세 페이지가 같은 패턴이므로 ＋ 토글 버튼 정도는 작은 공용 컴포넌트 1개(src/components)로 두는 것을 허용한다. 과한 추상화(훅·컨텍스트)는 만들지 않는다. 공용화 여부와 이름은 에이전트 판단이고 result에 이유를 적는다. (5) 좁은 화면에서 Books 제목 줄(독서 기록·AI 추천·＋)이 깨지지 않도록 줄바꿈을 허용하는 정도로 대응한다(기존 버튼 라벨 변경은 하지 않는다). window.confirm/alert/prompt 금지, 전체 파일 재작성 금지, 최소 수정.",
   "scope": {
     "in": [
-      "photobook 도메인의 types.ts, actions.ts, PhotobookForm.tsx, PhotobookLibraryContent.tsx, PhotobookDetailModal.tsx 수정"
+      "세 *LibraryContent.tsx의 제목 줄과 검색 섹션 렌더 부분(열림 상태, ＋ 버튼, 패널 래핑, 자동 닫힘)",
+      "ExternalBookSearchSection.tsx 입력의 자동 포커스 등 최소 수정",
+      "필요 시 ＋ 토글 버튼 공용 컴포넌트 1개 추가"
     ],
     "out": [
-      "DB 스키마·ALTER·SQL 실행 — 컬럼 추가가 필요해 보여도 직접 하지 말고 result에 보고할 것",
-      "동일 모델 묶음(normalizePhotobookModelKey)·Wikipedia 조회·모델 클릭 검색 로직 변경",
-      "books/comics 도메인, 외부 검색(YES24) 로직",
+      "검색·선택·폼 채움·저장 로직, 목록 검색·필터·정렬 변경 — 절대 건드리지 말 것",
+      "기존 제목 줄 버튼(독서 기록·AI 추천)의 라벨·동작 변경",
+      "YES24 호출(src/lib/yes24.ts), actions.ts, DB 스키마·SQL",
       "README·CONVENTIONS 등 문서와 feature_list 수정",
       "myaudio 전용 테이블·버킷",
       "git add/commit/push"
     ]
   },
   "done": [
-    "등록 폼과 수정 폼 모두에서 '모델' 아래에 선택 입력 '모델명2'가 보이고, 저장 후 다시 열면 값이 유지되며 비우고 저장하면 null로 저장된다",
-    "목록 검색창에 모델명2 값(대소문자 무관)을 입력하면 해당 포토북이 검색되고, 제목·모델 검색 결과는 기존과 동일하다",
-    "상세 모달의 '모델:' 줄 아래에 모델명2가 있을 때만 표시된다",
-    "동일 모델 묶음·Wikipedia 조회·모델 클릭 검색 코드는 변경되지 않았다(git diff로 확인)",
+    "로그인 상태에서 세 페이지 제목 줄 오른쪽 끝에 같은 모양의 ＋ 아이콘 버튼(aria-label 포함)이 있고 비로그인에서는 보이지 않는다. 패널이 닫혀 있으면 등록용 검색창·직접 등록하기 버튼이 화면에 보이지 않는다",
+    "＋를 누르면 제목 줄 아래 패널이 열려 검색창에 포커스가 가고(검색창·직접 등록하기·결과 목록 포함) 버튼이 X로 바뀌며, X를 누르면 패널이 닫히고 검색어·결과가 초기화된다",
+    "직접 등록하기 또는 검색 결과 선택으로 등록 폼이 열리면 패널이 닫히고 검색 상태는 유지되며, 저장 완료 후에는 기존처럼 검색 상태가 초기화된다. 검색→선택→폼 채움→저장 흐름은 이전과 동일하게 동작한다",
+    "Books 제목 줄(독서 기록·AI 추천·＋)이 좁은 화면에서 깨지지 않는다",
     "npx tsc --noEmit과 npm run lint가 통과한다(에러 0)"
   ],
   "status": "done",
-  "result": "변경: Photobook.model_name2 타입 추가; actions buildPhotobookRow에서 trim 후 빈값→null 저장; Form에 '모델' 아래 모델명2(apiField 없음·placeholder '영문명 등 (검색용)'); LibraryContent initial/edit/select·검색 필터에 model_name2 반영(select('*')라 fetch 변경 없음); DetailModal에 값 있을 때만 표시.\n모델 묶음·wiki·모델 클릭 검색 코드 미변경.\n검증: tsc 통과, lint error 0 / warning 18.\ngit diff --stat: photobook 5 files, +22/-3."
+  "result": "변경: RegisterPanelToggle 공용 컴포넌트 추가(세 페이지 동일 ＋/X·aria 패턴 중복 방지, 훅/컨텍스트 없음). 세 LibraryContent에 registerPanelOpen·제목줄 토글·hairline 패널 래핑. X 닫기 시 handleClearSearch, 직접등록/검색선택 시 패널만 닫고 검색 유지. ExternalBookSearchSection input autoFocus. Books 제목줄 flex-wrap.\n검증: tsc 통과, lint error 0 / warning 18."
 }

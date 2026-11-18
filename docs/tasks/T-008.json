@@ -1,0 +1,28 @@
+{
+  "id": "T-008",
+  "feature_id": "PHOTO-005",
+  "goal": "포토북 등록·수정 폼에서 '모델' 아래에 선택 입력 '모델명2'(영문명 등)를 입력·저장할 수 있고, 목록 검색에서 모델명2로도 포토북이 검색되며, 상세 모달에 모델명2가 표시된다.",
+  "context": "선행조건(JW가 처리): Supabase에서 photobook 테이블에 model_name2 컬럼(text, null 허용)을 추가한다. 이 작업은 DB를 건드리지 않는다. 컬럼이 이미 있다고 가정하고 구현하며, ALTER·SQL 실행은 하지 않는다. 현재 구조: 폼의 '모델' 입력이 photobook.author 컬럼이다. 동일 모델 묶음(normalizePhotobookModelKey(author))·일본어 Wikipedia 조회·모델 클릭 검색은 모두 author 기준이고 이번 작업에서 바꾸지 않는다. 모델명2는 검색용 별칭으로만 쓴다. 대상: (1) src/app/photobook/types.ts — Photobook에 model_name2?: string | null 추가. (2) src/app/photobook/actions.ts — PhotobookFormPayload와 buildPhotobookRow에 model_name2를 추가하고, trim 후 빈 문자열이면 null로 저장한다. savePhotobookToDB·updatePhotobookInDB 둘 다 반영된다. (3) src/app/photobook/_components/PhotobookForm.tsx — FormData에 model_name2 추가, '모델'(author) 입력 바로 아래에 선택 입력 '모델명2' 추가, 안내문(placeholder)은 '영문명 등 (검색용)'. renderInput의 세 번째 인자 의미(외부 검색 항목 키로 보임)를 확인해서, 외부 소스가 없는 이 필드에 부작용 없이 처리한다. (4) src/app/photobook/_components/PhotobookLibraryContent.tsx — initialFormData, photobookToFormData(수정 시 기존값 로드, null이면 빈 문자열), handleSelectItem의 setFormData(외부 검색 선택 시 빈 문자열)에 model_name2 추가하고, 목록 검색 필터(약 358~362줄)에 model_name2를 포함한다(소문자 비교, null 안전). fetchLibrary 등 조회 쿼리가 컬럼을 명시하고 있다면 model_name2가 포함되도록 한다(select('*')면 변경 불필요). (5) src/app/photobook/_components/PhotobookDetailModal.tsx — '모델:' 줄(약 102줄) 아래에 model_name2가 있을 때만 '모델명2: 값'을 같은 스타일로 표시한다. 모델명2가 비어 있으면 아무것도 표시하지 않는다. 기본안과 다르게 구현해야 할 이유가 있으면 result에 적는다. 디자인은 Raycast 규칙(CONVENTIONS.md): drop shadow 금지, accent 색상·흰색 pill CTA 추가 금지. window.confirm/alert/prompt 금지, 전체 파일 재작성 금지, 최소 수정.",
+  "scope": {
+    "in": [
+      "photobook 도메인의 types.ts, actions.ts, PhotobookForm.tsx, PhotobookLibraryContent.tsx, PhotobookDetailModal.tsx 수정"
+    ],
+    "out": [
+      "DB 스키마·ALTER·SQL 실행 — 컬럼 추가가 필요해 보여도 직접 하지 말고 result에 보고할 것",
+      "동일 모델 묶음(normalizePhotobookModelKey)·Wikipedia 조회·모델 클릭 검색 로직 변경",
+      "books/comics 도메인, 외부 검색(YES24) 로직",
+      "README·CONVENTIONS 등 문서와 feature_list 수정",
+      "myaudio 전용 테이블·버킷",
+      "git add/commit/push"
+    ]
+  },
+  "done": [
+    "등록 폼과 수정 폼 모두에서 '모델' 아래에 선택 입력 '모델명2'가 보이고, 저장 후 다시 열면 값이 유지되며 비우고 저장하면 null로 저장된다",
+    "목록 검색창에 모델명2 값(대소문자 무관)을 입력하면 해당 포토북이 검색되고, 제목·모델 검색 결과는 기존과 동일하다",
+    "상세 모달의 '모델:' 줄 아래에 모델명2가 있을 때만 표시된다",
+    "동일 모델 묶음·Wikipedia 조회·모델 클릭 검색 코드는 변경되지 않았다(git diff로 확인)",
+    "npx tsc --noEmit과 npm run lint가 통과한다(에러 0)"
+  ],
+  "status": "done",
+  "result": "변경: Photobook.model_name2 타입 추가; actions buildPhotobookRow에서 trim 후 빈값→null 저장; Form에 '모델' 아래 모델명2(apiField 없음·placeholder '영문명 등 (검색용)'); LibraryContent initial/edit/select·검색 필터에 model_name2 반영(select('*')라 fetch 변경 없음); DetailModal에 값 있을 때만 표시.\n모델 묶음·wiki·모델 클릭 검색 코드 미변경.\n검증: tsc 통과, lint error 0 / warning 18.\ngit diff --stat: photobook 5 files, +22/-3."
+}
