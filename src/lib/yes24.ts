@@ -1,8 +1,8 @@
 import { formatPubDate } from '@/lib/format';
 
-export const ALADIN_SEARCH_DISPLAY = 30;
+export const BOOK_SEARCH_DISPLAY = 30;
 
-export type AladinSearchItem = {
+export type BookSearchItem = {
   title?: string;
   author?: string;
   publisher?: string;
@@ -17,8 +17,8 @@ export type AladinSearchItem = {
   is_adult?: boolean;
 };
 
-export type AladinSearchResult = {
-  items: AladinSearchItem[];
+export type BookSearchResult = {
+  items: BookSearchItem[];
   total: number;
   error?: string;
 };
@@ -69,7 +69,7 @@ function mapPages(pages: number | null | undefined): string {
   return String(pages);
 }
 
-function mapItem(it: Yes24GoodsItem): AladinSearchItem {
+function mapItem(it: Yes24GoodsItem): BookSearchItem {
   const intro =
     typeof it.contentDetail?.bookIntroduction === 'string'
       ? stripHtml(it.contentDetail.bookIntroduction)
@@ -132,16 +132,16 @@ async function yes24Fetch(pathname: string, params: Record<string, string>): Pro
   return { status: res.status, body, parseError };
 }
 
-export type SearchAladinOptions = {
+export type BookSearchOptions = {
   category?: 'ALL' | 'BOOK' | 'FOREIGN' | 'EBOOK' | 'MUSIC' | 'DVD';
 };
 
-export async function searchAladinBooks(
+export async function searchBooks(
   query: string,
   page: number = 1,
   display: number = 15,
-  options?: SearchAladinOptions,
-): Promise<AladinSearchResult> {
+  options?: BookSearchOptions,
+): Promise<BookSearchResult> {
   const trimmed = query.trim();
   if (!trimmed) {
     return { items: [], total: 0 };
@@ -185,7 +185,7 @@ export async function searchAladinBooks(
   return { items, total };
 }
 
-export async function getAladinItemByIsbn(
+export async function getBookDetailByIsbn(
   isbn: string,
 ): Promise<{ total_pages?: string; description?: string } | null> {
   const trimmed = isbn?.trim();

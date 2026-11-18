@@ -22,7 +22,7 @@ export interface Comic {
   created_at?: string;
 }
 
-export interface AladinSearchBookItem {
+export interface ExternalBookItem {
   title?: string;
   author?: string;
   publisher?: string;
@@ -38,4 +38,4 @@ export interface AladinSearchBookItem {
   [key: string]: unknown;
 }
 
-export type SelectedComic = Comic | AladinSearchBookItem | { isManual: true };
+export type SelectedComic = Comic | ExternalBookItem | { isManual: true };

@@ -4,18 +4,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
-import { ALADIN_SEARCH_DISPLAY } from '@/lib/yes24';
+import { BOOK_SEARCH_DISPLAY } from '@/lib/yes24';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import {
   deleteComicFromDB,
-  getAladinItemByIsbn,
+  getBookDetailByIsbn,
   saveComicToDB,
-  searchAladinBooks,
+  searchBooks,
   updateComicInDB,
 } from '../actions';
 import { categoryOptions } from '../constants';
-import type { AladinSearchBookItem, Comic, SelectedComic } from '../types';
+import type { ExternalBookItem, Comic, SelectedComic } from '../types';
 import { ComicsDetailModal } from './ComicsDetailModal';
 import { ComicsForm } from './ComicsForm';
 import { ComicsList } from './ComicsList';
@@ -81,7 +81,7 @@ export function ComicsLibraryContent() {
   const isAuthenticated = useAuthState();
 
   const [query, setQuery] = useState('');
-  const [searchItems, setSearchItems] = useState<AladinSearchBookItem[]>([]);
+  const [searchItems, setSearchItems] = useState<ExternalBookItem[]>([]);
   const [selectedComic, setSelectedComic] = useState<SelectedComic | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -140,7 +140,7 @@ export function ComicsLibraryContent() {
     setHasSearched(true);
     setIsSearching(true);
     try {
-      const result = await searchAladinBooks(query, 1, ALADIN_SEARCH_DISPLAY);
+      const result = await searchBooks(query, 1, BOOK_SEARCH_DISPLAY);
       if (result.error) {
         setSearchItems([]);
         setTotalResults(0);
@@ -172,7 +172,7 @@ export function ComicsLibraryContent() {
     setFormData(initialFormData);
   };
 
-  const handleSelectItem = (item: AladinSearchBookItem) => {
+  const handleSelectItem = (item: ExternalBookItem) => {
     if (!isAuthenticated) {
       toast.error('로그인이 필요합니다.');
       return;
@@ -202,7 +202,7 @@ export function ComicsLibraryContent() {
       is_adult: !!item.is_adult,
     });
     if (isbn) {
-      getAladinItemByIsbn(isbn)
+      getBookDetailByIsbn(isbn)
         .then((r) => {
           if (r && (r.total_pages != null || r.description != null)) {
             setFormData((prev) => ({

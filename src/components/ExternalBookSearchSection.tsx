@@ -4,7 +4,7 @@ import { Building2, Calendar, Search, User, X } from 'lucide-react';
 
 const iconClass = 'size-4 shrink-0 text-mute';
 
-interface AladinSearchSectionProps {
+interface ExternalBookSearchSectionProps {
   query: string;
   setQuery: (v: string) => void;
   items: Array<Record<string, unknown>>;
@@ -21,7 +21,7 @@ interface AladinSearchSectionProps {
   formatAuthor?: (author: string) => string;
 }
 
-export function AladinSearchSection({
+export function ExternalBookSearchSection({
   query,
   setQuery,
   items,
@@ -36,7 +36,7 @@ export function AladinSearchSection({
   isAuthenticated,
   inputBaseClass,
   formatAuthor,
-}: AladinSearchSectionProps) {
+}: ExternalBookSearchSectionProps) {
   return (
     <>
       <div className="mb-4 flex gap-2">

@@ -1,30 +1,30 @@
 'use client';
 
-import { AladinSearchSection } from '@/components/AladinSearchSection';
+import { ExternalBookSearchSection } from '@/components/ExternalBookSearchSection';
 import { formatAuthorName } from '@/lib/format';
-import type { AladinSearchBookItem } from '../types';
+import type { ExternalBookItem } from '../types';
 
 interface BookSearchSectionProps {
   query: string;
   setQuery: (v: string) => void;
-  books: AladinSearchBookItem[];
+  books: ExternalBookItem[];
   hasSearched: boolean;
   isSearching: boolean;
   totalResults: number;
   onSearch: () => void;
   onClearSearch: () => void;
   onManualRegister: () => void;
-  onSelectBook: (book: AladinSearchBookItem) => void;
+  onSelectBook: (book: ExternalBookItem) => void;
   isAuthenticated: boolean | null;
   inputBaseClass: string;
 }
 
 export function BookSearchSection({ books, onSelectBook, ...props }: BookSearchSectionProps) {
   return (
-    <AladinSearchSection
+    <ExternalBookSearchSection
       {...props}
       items={books}
-      onSelectItem={(item) => onSelectBook(item as AladinSearchBookItem)}
+      onSelectItem={(item) => onSelectBook(item as ExternalBookItem)}
       placeholder="새로운 책을 검색하세요"
       formatAuthor={formatAuthorName}
     />

@@ -3,22 +3,22 @@
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
 import { formatPubDate } from '@/lib/format';
 import {
-  searchAladinBooks as searchAladinBooksLib,
-  getAladinItemByIsbn as getAladinItemByIsbnLib,
-  type SearchAladinOptions,
+  searchBooks as searchBooksLib,
+  getBookDetailByIsbn as getBookDetailByIsbnLib,
+  type BookSearchOptions,
 } from '@/lib/yes24';
 
-export async function searchAladinBooks(
+export async function searchBooks(
   query: string,
   page: number = 1,
   display: number = 15,
-  options?: SearchAladinOptions,
+  options?: BookSearchOptions,
 ) {
-  return searchAladinBooksLib(query, page, display, options);
+  return searchBooksLib(query, page, display, options);
 }
 
-export async function getAladinItemByIsbn(isbn: string) {
-  return getAladinItemByIsbnLib(isbn);
+export async function getBookDetailByIsbn(isbn: string) {
+  return getBookDetailByIsbnLib(isbn);
 }
 interface ComicFormPayload {
   title: string;

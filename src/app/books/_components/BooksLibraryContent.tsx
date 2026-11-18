@@ -4,18 +4,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BarChart2, BookOpen, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { ALADIN_SEARCH_DISPLAY } from '@/lib/yes24';
+import { BOOK_SEARCH_DISPLAY } from '@/lib/yes24';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import {
   deleteBookFromDB,
-  getAladinItemByIsbn,
+  getBookDetailByIsbn,
   saveBookToDB,
-  searchAladinBooks,
+  searchBooks,
   updateBookInDB,
 } from '../actions';
 import { categoryOptions } from '../constants';
-import type { AladinSearchBookItem, Book, SelectedBook } from '../types';
+import type { ExternalBookItem, Book, SelectedBook } from '../types';
 import { getOwnershipStatus } from '../utils';
 import { BookDetailModal } from './BookDetailModal';
 import { BookForm } from './BookForm';
@@ -91,7 +91,7 @@ export function BooksLibraryContent() {
   const isAuthenticated = useAuthState();
 
   const [query, setQuery] = useState('');
-  const [books, setBooks] = useState<AladinSearchBookItem[]>([]);
+  const [books, setBooks] = useState<ExternalBookItem[]>([]);
   const [selectedBook, setSelectedBook] = useState<SelectedBook | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -202,7 +202,7 @@ export function BooksLibraryContent() {
     setHasSearched(true);
     setIsSearching(true);
     try {
-      const result = await searchAladinBooks(query, 1, ALADIN_SEARCH_DISPLAY);
+      const result = await searchBooks(query, 1, BOOK_SEARCH_DISPLAY);
       if (result.error) {
         setBooks([]);
         setTotalResults(0);
@@ -235,7 +235,7 @@ export function BooksLibraryContent() {
     setFormData(initialFormData);
   };
 
-  const handleSelectBook = (book: AladinSearchBookItem) => {
+  const handleSelectBook = (book: ExternalBookItem) => {
     if (!isAuthenticated) {
       toast.error('로그인이 필요합니다.');
       return;
@@ -268,7 +268,7 @@ export function BooksLibraryContent() {
       is_adult: !!book.is_adult,
     });
     if (isbn) {
-      getAladinItemByIsbn(isbn)
+      getBookDetailByIsbn(isbn)
         .then((r) => {
           if (r && (r.total_pages != null || r.description != null)) {
             setFormData((prev) => ({

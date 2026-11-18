@@ -4,19 +4,19 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Camera } from 'lucide-react';
 import { toast } from 'sonner';
-import { ALADIN_SEARCH_DISPLAY } from '@/lib/yes24';
+import { BOOK_SEARCH_DISPLAY } from '@/lib/yes24';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import {
   deletePhotobookFromDB,
-  getAladinItemByIsbn,
+  getBookDetailByIsbn,
   savePhotobookToDB,
-  searchAladinBooks,
+  searchBooks,
   updatePhotobookInDB,
 } from '../actions';
 import { categoryOptions } from '../constants';
 import type {
-  AladinSearchBookItem,
+  ExternalBookItem,
   Photobook,
   PhotobookModelGroup,
   SelectedPhotobook,
@@ -84,7 +84,7 @@ export function PhotobookLibraryContent() {
   const isAuthenticated = useAuthState();
 
   const [query, setQuery] = useState('');
-  const [searchItems, setSearchItems] = useState<AladinSearchBookItem[]>([]);
+  const [searchItems, setSearchItems] = useState<ExternalBookItem[]>([]);
   const [selectedPhotobook, setSelectedPhotobook] = useState<SelectedPhotobook | null>(null);
   const [viewingPhotobook, setViewingPhotobook] = useState<Photobook | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -179,7 +179,7 @@ export function PhotobookLibraryContent() {
     setHasSearched(true);
     setIsSearching(true);
     try {
-      const result = await searchAladinBooks(query, 1, ALADIN_SEARCH_DISPLAY, {
+      const result = await searchBooks(query, 1, BOOK_SEARCH_DISPLAY, {
         category: 'BOOK',
       });
       if (result.error) {
@@ -213,7 +213,7 @@ export function PhotobookLibraryContent() {
     setFormData(initialFormData);
   };
 
-  const handleSelectItem = (item: AladinSearchBookItem) => {
+  const handleSelectItem = (item: ExternalBookItem) => {
     if (!isAuthenticated) {
       toast.error('로그인이 필요합니다.');
       return;
@@ -240,7 +240,7 @@ export function PhotobookLibraryContent() {
       is_adult: !!item.is_adult,
     });
     if (isbn) {
-      getAladinItemByIsbn(isbn)
+      getBookDetailByIsbn(isbn)
         .then((r) => {
           if (r?.total_pages != null) {
             setFormData((prev) => ({ ...prev, total_pages: r.total_pages || prev.total_pages }));

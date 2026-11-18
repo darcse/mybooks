@@ -66,7 +66,7 @@ mybooks/
 │   │       ├── highlight-explanation/  # Claude Sonnet 5 하이라이트 심층 해설
 │   │       └── monthly-review-comment/ # Gemini 월간 종합 리뷰 코멘트 생성/캐싱
 │   ├── components/             # 공용 UI 컴포넌트
-│   │   ├── AladinSearchSection.tsx     # YES24 검색 공통 컴포넌트
+│   │   ├── ExternalBookSearchSection.tsx     # YES24 검색 공통 컴포넌트
 │   │   ├── AsyncMutationUi.tsx         # 비동기 상태 피드백 UI
 │   │   └── layout/             # Navigation, ThemeAwareToaster
 │   ├── hooks/

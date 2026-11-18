@@ -27,7 +27,7 @@ export interface PhotobookModelGroup {
   coverImageUrl: string | null;
 }
 
-export interface AladinSearchBookItem {
+export interface ExternalBookItem {
   title?: string;
   author?: string;
   publisher?: string;
@@ -41,7 +41,7 @@ export interface AladinSearchBookItem {
   [key: string]: unknown;
 }
 
-export type SelectedPhotobook = Photobook | AladinSearchBookItem | { isManual: true };
+export type SelectedPhotobook = Photobook | ExternalBookItem | { isManual: true };
 
 export interface SameModelPhotobookItem {
   id: number;

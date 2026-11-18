@@ -36,7 +36,7 @@ export interface BookHighlight {
   ai_explanation: string | null;
 }
 
-export interface AladinSearchBookItem {
+export interface ExternalBookItem {
   title?: string;
   author?: string;
   publisher?: string;
@@ -52,4 +52,4 @@ export interface AladinSearchBookItem {
   [key: string]: unknown;
 }
 
-export type SelectedBook = Book | AladinSearchBookItem | { isManual: true };
+export type SelectedBook = Book | ExternalBookItem | { isManual: true };

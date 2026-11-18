@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, getCurrentUser } from '@/lib/supabase/server';
 import { generateBookReadingRecommendations } from '@/lib/gemini';
-import { searchAladinBooks, yes24SearchFallbackUrl } from '@/lib/yes24';
+import { searchBooks, yes24SearchFallbackUrl } from '@/lib/yes24';
 import { getOwnershipStatus } from '@/app/books/utils';
 import type { Book } from '@/app/books/types';
 
@@ -93,7 +93,7 @@ export async function POST() {
     const q = `${raw.external.title} ${raw.external.author}`.trim().slice(0, 120);
     if (q) {
       try {
-        const { items, error } = await searchAladinBooks(q);
+        const { items, error } = await searchBooks(q);
         if (!error) {
           const link = items[0]?.link;
           if (typeof link === 'string' && link.trim() !== '') {

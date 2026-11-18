@@ -51,7 +51,7 @@ mybooks/
 │   │       ├── book-stats-comment/route.ts
 │   │       ├── highlight-explanation/route.ts
 │   │       └── monthly-review-comment/route.ts
-│   ├── components/                   # 공용: AladinSearchSection, AsyncMutationUi, layout/
+│   ├── components/                   # 공용: ExternalBookSearchSection, AsyncMutationUi, layout/
 │   ├── hooks/useAuthState.ts
 │   ├── lib/
 │   │   ├── supabase/client.ts, server.ts
