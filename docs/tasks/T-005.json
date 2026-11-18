@@ -1,0 +1,26 @@
+{
+  "id": "T-005",
+  "goal": "npm run lint가 빌드 검증 산출물(.next-buildcheck)을 검사하지 않아, 소스(src)의 실제 린트 결과만 깔끔하게 나온다. 이후 작업의 done 기준(npm run lint 통과)을 그대로 지킬 수 있다.",
+  "context": "현재 eslint.config.mjs의 ignores에는 node_modules/**, .next/**, out/**, build/**, next-env.d.ts만 있고 .next-buildcheck/**가 없다. npm run build:check는 .next-buildcheck에 산출물을 만드는데(실행 중인 dev의 .next를 덮지 않으려는 용도), npm run lint(= eslint, 인자 없음)가 이 산출물까지 검사해서 노이즈가 많다(T-001 때 Cursor가 보고). 또한 git check-ignore 결과 .next-buildcheck는 현재 .gitignore에 없다(레포 .gitignore에는 /.next/만 있음). 기본안: (1) eslint.config.mjs의 ignores에 \".next-buildcheck/**\" 한 줄 추가. (2) .gitignore에 /.next-buildcheck/ 한 줄 추가(이미 무시되는 방법이 있다면 중복 추가하지 말고 result에 이유를 적는다). (3) 수정 후 npm run lint를 실행해 결과를 result에 요약한다(에러 수·경고 수, 경고가 있으면 종류별 한두 줄). 기존 src의 경고(no-img-element, exhaustive-deps 등)를 고치지는 않는다. 만약 .next-buildcheck를 무시한 뒤에도 에러(error)가 남으면 고치지 말고 원인 파일과 규칙을 result에 보고한다. npm run build와 npm run build:check는 실행하지 않는다. 전체 파일 재작성 금지, 최소 수정.",
+  "scope": {
+    "in": [
+      "eslint.config.mjs ignores에 .next-buildcheck/** 추가",
+      ".gitignore에 /.next-buildcheck/ 추가"
+    ],
+    "out": [
+      "src 코드 수정 — 린트 경고 해결 포함, 절대 건드리지 말 것",
+      "package.json·다른 설정 파일 수정",
+      "npm run build, npm run build:check 실행",
+      "문서·feature_list 수정",
+      "myaudio 전용 테이블·버킷, DB",
+      "git add/commit/push"
+    ]
+  },
+  "done": [
+    "eslint.config.mjs의 ignores에 .next-buildcheck/**가 있고 .gitignore에서 .next-buildcheck가 무시된다(git check-ignore로 확인)",
+    "npm run lint가 에러 0건으로 끝나고 .next-buildcheck 산출물 관련 출력이 나오지 않는다. 남은 경고는 result에 종류만 요약한다",
+    "git diff가 eslint.config.mjs와 .gitignore 두 파일뿐이다"
+  ],
+  "status": "done",
+  "result": "eslint.config.mjs ignores에 .next-buildcheck/** 추가. .gitignore에 /.next-buildcheck/ 추가.\ngit check-ignore: .gitignore:18:/.next-buildcheck/ → .next-buildcheck/foo 매칭 확인.\nnpm run lint: error 0, warning 18 (15 files). 종류: @next/next/no-img-element 17건, react-hooks/exhaustive-deps 1건. .next-buildcheck 관련 출력 없음.\n구현 diff: eslint.config.mjs, .gitignore. (TASK.json status/result는 handoff 갱신.)"
+}
