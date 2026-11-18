@@ -15,7 +15,7 @@ mybooks는 개인이 보유하고 감상한 **도서(Books), 코믹스(Comics), 
     *   CSS 변수 기반 테마 시스템 (Light / Dark / Auto 모드 지원, `localStorage` 영속화)
     *   Inter 폰트 (`font-feature-settings: "calt", "kern", "liga", "ss03"` 전역 적용)
 *   **Database & Auth**: Supabase (PostgreSQL, Supabase Auth, `@supabase/ssr`, Row Level Security)
-    *   *주의: 기존 mylibrary / myaudio 서비스와 동일한 Supabase 인스턴스를 공유하며, mybooks 도메인 테이블만 독립적으로 사용합니다.*
+    *   *주의: myaudio 서비스와 동일한 Supabase 인스턴스를 공유하며, mybooks 도메인 테이블만 독립적으로 사용합니다 (`monthly_review_comments`는 `app` 컬럼으로 구분).*
 *   **AI Integration (Multi-Model Architecture)**:
     *   **Anthropic Claude**: `claude-sonnet-5` (인문·역사·사회·철학 하이라이트 문장 심층 AI 해설)
     *   **Google Gemini**: `gemini-3.5-flash-lite` (완독 이력 기반 도서 추천 + Google Search Grounding, 연도별 독서 통계 코멘트, 월별 아카이브 리뷰 코멘트)
@@ -68,6 +68,7 @@ mybooks/
 │   ├── components/             # 공용 UI 컴포넌트
 │   │   ├── ExternalBookSearchSection.tsx     # YES24 검색 공통 컴포넌트
 │   │   ├── AsyncMutationUi.tsx         # 비동기 상태 피드백 UI
+│   │   ├── InlineDeleteConfirm.tsx     # 인라인 삭제 확인 UI
 │   │   └── layout/             # Navigation, ThemeAwareToaster
 │   ├── hooks/
 │   │   └── useAuthState.ts     # Supabase 클라이언트 인증 상태 구독 훅
@@ -80,28 +81,37 @@ mybooks/
 │   │   └── format.ts           # 날짜, 통계 포맷 유틸리티
 │   ├── middleware.ts           # 세션 유지 및 라우트 보호 미들웨어
 │   └── proxy.ts                # Supabase SSR 세션 갱신 프록시
-├── feature_list/               # 하네스 검증 명세서 (BOOK, COMICS, PHOTO, UX 등)
+├── docs/
+│   ├── research/               # 외부 API 등 기술 조사 문서
+│   └── tasks/                  # 완료된 TASK.json 보관 기록
+├── feature_list/               # 하네스 검증 명세서 (BOOK, BUG, COMICS, PHOTOBOOK, SETUP, UX)
+├── AGENTS.md                   # 에이전트 행동 규칙 (Cursor용)
+├── CLAUDE.md                   # 에이전트 행동 규칙 (Claude Code용)
 ├── CONVENTIONS.md              # 코딩 컨벤션 및 도메인 규칙
-└── HARNESS.md                  # 하네스 운용 및 dev/build 서버 규칙
+├── DESIGN.md                   # 디자인 시스템 명세
+├── HARNESS.md                  # 하네스 운용 및 dev/build 서버 규칙
+├── PRODUCT_BRIEF.md            # 제품 브리프
+├── TASK.json                   # 현재 작업 지시 1건
+└── vercel.json                 # Vercel 배포 리전 설정 (icn1)
 ```
 
 ---
 
 ## 3. 데이터베이스 명세 (Database Schema)
 
-mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며 아래 6개 테이블만 격리하여 접근·운용합니다.
+mybooks는 myaudio와 동일한 Supabase 인스턴스를 공유하며 아래 6개 테이블만 격리하여 접근·운용합니다.
 
 | 테이블 | 도메인 | 주요 역할 및 저장 정보 |
 |---|---|---|
 | `books` | 도서 컬렉션 | 기본 서지 정보(제목, 저자, 출판사, 표지, ISBN, 카테고리), 보유 상태, 독서 상태(미독/읽는중/완독), 총 페이지, 현재 페이지(`current_page`), 완독일자, 별점, 감상 메모 등 |
 | `comics` | 만화 컬렉션 | 만화 서지 정보, 출판사, 표지, 카테고리, 상태(보유/방출), 진행도, 메모 등 |
 | `photobook` | 포토북 컬렉션 | 화보/포토북 메타데이터, 저자/모델명, 출판사, 표지, 상태(소장/방출), 별점, 메모 (로그인 전용) |
-| `book_highlights` | 도서 하이라이트 | 도서 외래키(`book_id`), 발췌 문장 본문(`content`), 페이지 번호(`page_number`), 태그 배열(`tags`), AI 심층 해설 내용(`ai_explanation`) |
+| `book_highlights` | 도서 하이라이트 | 도서 외래키(`book_id`), 발췌 문장 본문(`content`), 태그 배열(`tags`), AI 심층 해설 내용(`ai_explanation`) |
 | `book_stats_comments` | 독서 통계 코멘트 | 연도(`year`)별 완독 도서 데이터를 기반으로 Gemini가 분석한 독서 성향 총평 코멘트 캐시 |
-| `monthly_review_comments` | 월별 아카이브 코멘트 | 연월(`year`, `month`)별 완독 도서·코믹스·포토북 활동 기록을 요약하여 Gemini가 생성한 월간 리뷰 캐시 |
+| `monthly_review_comments` | 월별 아카이브 코멘트 | 연월(`year`, `month`)별 완독 도서·포토북 활동 기록을 요약하여 Gemini가 생성한 월간 리뷰 캐시 (myaudio와 공용이며 `app = 'mybooks'` 조건으로 구분, upsert 키 `year, month, app`) |
 
 *   **Row Level Security (RLS)**: 모든 테이블에 RLS가 활성화되어 있으며, 기본 패턴 `auth.uid() = user_id` 정책으로 쓰기 권한이 엄격하게 격리됩니다.
-*   **공개/보호 분기**: 일반 도서(`books`)와 만화(`comics`) 목록은 비로그인 사용자에게도 읽기 권한을 허용하며, 포토북(`photobook`), 아카이브(`archive`), 하이라이트 상세 및 모든 등록/수정/삭제 액션은 로그인 세션을 요구합니다.
+*   **공개/보호 분기**: 일반 도서(`books`)와 만화(`comics`) 목록은 비로그인 사용자에게도 읽기 권한을 허용하며, 포토북(`photobook`), 아카이브(`archive`), 하이라이트(`/books/highlights`, `/books/highlights/[bookId]`) 및 모든 등록/수정/삭제 액션은 로그인 세션을 요구합니다.
 
 ---
 
@@ -125,11 +135,13 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 ### 4.2. 도서 라이브러리 (Books — `/books`)
 
 *   **다각도 검색 & 필터링**:
-    *   카테고리(총류, 철학, 종교, 사회과학, 자연과학, 기술과학, 예술, 언어, 문학, 역사 등), 보유 상태, 도서 형태, 독서 상태(미독/읽는중/완독) 필터.
+    *   카테고리(IT, UX/UI, 마케팅/비즈니스, 역사, 신화/종교/판타지, 문학, 우주/과학, 인문/사회/철학, 화집/설정집 등), 보유 상태, 도서 형태, 독서 상태(읽기 전/읽는 중/완독) 필터.
     *   실시간 도서명/저자명 검색, 정렬(구입일순, 완독일순, 제목순, 별점순), 페이지네이션.
 *   **YES24 검색 기반 도서 등록 및 관리**:
-    *   YES24 검색창 키워드 입력으로 서지 메타데이터(제목, 저자, 출판사, 출판일, 정가, 표지, ISBN 등) 원클릭 자동 완성.
-    *   도서 등록, 수정, 삭제의 완벽한 Server Actions 처리 및 실시간 캐시 무효화.
+    *   YES24 검색창(`ExternalBookSearchSection`) 키워드 입력으로 서지 메타데이터(제목, 저자, 출판사, 출판일, 정가, 표지, ISBN 등) 원클릭 자동 완성 및 결과 상단 YES24 출처 표기·항목별 "YES24에서 보기" 링크 제공.
+    *   YES24 응답의 `adultYn` 값을 반영해 성인 여부(`is_adult`) 자동 설정.
+    *   검색 오류를 인증 오류(401/`AUTH_001`·`AUTH_002`), 요청 한도 초과(429/`RATE_001`·`RATE_002`), 일반 오류로 구분해 안내.
+    *   도서 등록·수정·삭제의 Server Actions 처리 및 인라인 삭제 확인 UI(`InlineDeleteConfirm`) 적용.
 *   **도서 상세 모달 (`BookDetailModal`)**:
     *   도서 정보 탭: 표지, 기본 출판 정보, 별점, 감상 메모 관리.
     *   **독서 진행 페이지 인라인 실시간 편집**: 별도 편집 모드 진입 없이 현재 읽은 페이지(`current_page`)를 즉시 입력·저장(Blur 및 Enter 시 자동 DB 동기화, 초과 페이지 클램핑).
@@ -143,8 +155,8 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 ### 4.3. 하이라이트 시스템 (Highlights)
 
 *   **하이라이트 CRUD & 인라인 편집**:
-    *   발췌 문장, 인용 페이지 번호, 사용자 지정 태그 배열 저장.
-    *   하이라이트 목록에서 즉시 인라인으로 문장 및 태그 수정 가능.
+    *   발췌 문장, 사용자 지정 태그 배열 저장 및 하이라이트 목록 내 인라인 문장·태그 수정.
+    *   하이라이트 삭제 시 브라우저 confirm 대신 인라인 확인 UI(`InlineDeleteConfirm`) 사용.
 *   **전용 하이라이트 모아보기 허브 (`/books/highlights`)**:
     *   하이라이트가 1개 이상 등록된 도서들만 모아 카드형 뷰로 제공.
     *   도서 카테고리·상태 필터 및 도서명·저자명 실시간 검색.
@@ -153,17 +165,18 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
     *   도서 기본 메타데이터 헤더와 해당 도서의 하이라이트 전체 타임라인 뷰.
     *   태그별 다중 필터링 및 날짜순(최신순/과거순) 정렬 토글.
 *   **Claude Sonnet 5 기반 심층 AI 해설**:
-    *   하이라이트 문장에서 'AI 해설' 클릭 시 **Anthropic Claude(`claude-sonnet-5`)**가 문장이 내포한 역사적·사회적 배경, 핵심 개념의 맥락, 저자의 문제의식, 현대적 시사점을 700자 내외의 품격 있는 한국어로 분석.
-    *   생성된 해설은 `book_highlights.ai_explanation` 컬럼에 영구 저장되어 이후 재조회 시 즉시 렌더링되며, 필요 시 원클릭 재생성 지원.
+    *   하이라이트 문장에서 'AI 해설' 클릭 시 **Anthropic Claude(`claude-sonnet-5`)**가 문장이 내포한 역사적·사회적 배경, 핵심 개념의 맥락, 저자의 문제의식, 현대적 시사점을 700자 내외의 한국어로 분석.
+    *   생성된 해설은 `book_highlights.ai_explanation` 컬럼에 저장되어 재조회 시 즉시 렌더링되며, 원클릭 재생성(`force`) 및 인라인 확인(`InlineDeleteConfirm`)을 통한 해설 삭제(`DELETE /api/highlight-explanation`) 지원.
 
 ### 4.4. 코믹스 라이브러리 (Comics — `/comics`)
 
-*   YES24 검색 연동을 통한 만화책 메타데이터 자동 완성 및 등록/수정/삭제.
+*   YES24 검색 연동을 통한 만화책 메타데이터 자동 완성(출처 표기·"YES24에서 보기" 링크, `adultYn` 성인 여부 자동 설정, 검색 오류 구분 안내) 및 등록/수정/인라인 확인 삭제(`InlineDeleteConfirm`).
 *   카테고리 및 보유 상태 필터링, 검색, 페이지네이션.
 *   코믹스 상세 모달을 통한 독서 진행도 및 권별 소장 메모 관리.
 
 ### 4.5. 포토북 라이브러리 (Photobook — `/photobook`, 로그인 전용)
 
+*   YES24 검색 연동 시 도서 카테고리(`category: 'BOOK'`)로 한정하여 검색하며, `adultYn` 성인 여부 자동 설정 및 인라인 삭제 확인(`InlineDeleteConfirm`) 지원.
 *   화보 및 포토북 컬렉션 메타데이터 관리, 별점 및 소장/방출 상태 추적.
 *   **동일 저자/모델 그룹화 뷰**: 동일한 모델 또는 사진작가의 작품을 한데 모아보는 그룹 모달 제공.
 *   **일본어 Wikipedia 연동**: 모델명이 등록된 경우 일본 Wikipedia API를 비동기 호출하여 모델 프로필 요약 서머리와 대표 썸네일 이미지를 상세 모달에 자동 렌더링.
@@ -171,22 +184,24 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 ### 4.6. 아카이브 (Archive — `/archive`, 로그인 전용)
 
 *   **연도별 월 카드 그리드 (`/archive`)**:
-    *   완독 도서(`books.status = '완독'`), 신규 코믹스 등록, 포토북 등록 이력을 월별로 자동 집계하여 매력적인 매트릭스 카드로 시각화.
+    *   완독 도서(`books.status = '완독'`)와 포토북(`photobook`) 등록 이력을 월별로 자동 집계하여 매트릭스 카드로 시각화.
 *   **월별 활동 상세 타임라인 (`/archive/[year]/[month]`)**:
-    *   해당 월에 완료된 독서 및 컬렉션 수집 타임라인 제공.
+    *   해당 월에 완료된 도서 완독 및 포토북 등록 타임라인 제공.
     *   타임라인 항목 클릭 시 각 도메인의 상세 정보 모달로 다이렉트 연결.
-    *   **Gemini 월간 종합 리뷰 코멘트**: 한 달 동안의 문화 활동 텍스트를 종합 분석하여 따뜻하고 통찰력 있는 월간 회고 총평을 생성하고 `monthly_review_comments`에 캐싱.
+    *   **Gemini 월간 종합 리뷰 코멘트**: 한 달 동안의 완독 도서·포토북 활동을 분석하여 월간 회고 총평을 생성하고 `monthly_review_comments`(`app = 'mybooks'`)에 캐싱.
 
 ---
 
 ## 5. API 엔드포인트 명세 (API Endpoints)
 
-| 엔드포인트 | 메서드 | 사용 AI / 모델 | 설명 |
-|---|---|---|---|
-| `/api/book-recommend` | `POST` | Google Gemini (`gemini-3.5-flash-lite`) | 완독 이력과 미독 보유 목록을 분석하여 보유 도서 1권 + 외부 도서 1권 맞춤 추천 반환 |
-| `/api/book-stats-comment` | `POST` | Google Gemini (`gemini-3.5-flash-lite`) | 해당 연도 완독 도서 목록을 바탕으로 독서 성향 총평 코멘트 생성 및 캐싱 |
-| `/api/highlight-explanation`| `POST` | Anthropic Claude (`claude-sonnet-5`) | 발췌 문장의 인문·역사·철학적 맥락을 깊이 있게 해설한 700자 심층 해설 생성 |
-| `/api/monthly-review-comment`| `POST` | Google Gemini (`gemini-3.5-flash-lite`) | 해당 월의 도서·만화·포토북 활동 내역을 종합한 월간 회고 코멘트 생성 및 캐싱 |
+모든 `/api/*` 엔드포인트는 Supabase 로그인 세션을 요구하며, 미인증 시 `401 Unauthorized`를 반환합니다.
+
+| 엔드포인트 | 메서드 | 사용 AI / 모델 | 캐시 테이블 | 설명 |
+|---|---|---|---|---|
+| `/api/book-recommend` | `POST` | Google Gemini (`gemini-3.5-flash-lite`) | — | 완독 이력과 미독 보유 목록을 분석하여 보유 도서 1권 + 외부 도서 1권 맞춤 추천 반환 (YES24 검색으로 외부 링크 보강) |
+| `/api/book-stats-comment` | `GET`, `POST` | Google Gemini (`gemini-3.5-flash-lite`) | `book_stats_comments` | 연도별 완독 도서 기반 독서 성향 총평 코멘트 캐시 조회(`GET`) 및 생성·저장(`POST`) |
+| `/api/highlight-explanation` | `POST`, `DELETE` | Anthropic Claude (`claude-sonnet-5`) | `book_highlights` (`ai_explanation`) | 발췌 문장 700자 심층 해설 생성·재생성(`POST`) 및 저장된 해설 초기화(`DELETE`) |
+| `/api/monthly-review-comment` | `GET` | Google Gemini (`gemini-3.5-flash-lite`) | `monthly_review_comments` (`app = 'mybooks'`) | 해당 월의 완독 도서·포토북 활동 내역 조회 및 월간 회고 코멘트 캐시 조회·생성(`?refresh=1` 재생성) |
 
 ---
 
@@ -195,8 +210,11 @@ mybooks는 mylibrary, myaudio와 동일한 Supabase 인스턴스를 공유하며
 *   **인증 프로바이더**: Supabase Auth (Email / Password).
 *   **세션 지속성**: `@supabase/ssr`을 채택하여 브라우저 쿠키 기반으로 세션을 안전하게 동기화하며, Next.js Server Components 및 Server Actions에서 동일한 세션 컨텍스트 공유.
 *   **접근 권한 통제**:
-    *   공개 경로: 메인 대시보드(`/`), 도서 목록(`/books`), 코믹스 목록(`/comics`), 로그인(`/login`).
-    *   보호 경로: 포토북(`/photobook`), 아카이브(`/archive`), 도서별 하이라이트 상세(`/books/highlights/[bookId]`), 모든 데이터 CUD 액션 및 AI 생성 API. 비로그인 접근 시 로그인 프롬프트 노출 또는 `/login` 리다이렉트.
+    *   공개 경로: 메인 대시보드(`/`), 도서 목록(`/books`), 코믹스 목록(`/comics`), 로그인(`/login`). (단, `is_adult` 항목은 비로그인 시 열람 제한, 대시보드 Timeless 포토북 섹션은 로그인 시에만 조회)
+    *   보호 경로:
+        *   미들웨어(`src/middleware.ts` → `src/proxy.ts`): `/archive` 및 하위 경로 비로그인 접근 시 `/login` 리다이렉트, 로그인 상태에서 `/login` 접근 시 `/` 리다이렉트.
+        *   페이지 로그인 가드(비로그인 시 로그인 프롬프트 노출): 포토북(`/photobook`), 하이라이트 모아보기(`/books/highlights`), 도서별 하이라이트 상세(`/books/highlights/[bookId]`), 아카이브(`/archive`, `/archive/[year]/[month]`).
+        *   모든 데이터 CUD Server Actions 및 `/api/*` Route Handlers는 로그인 세션 필수.
 
 ---
 
@@ -233,9 +251,21 @@ npm run dev
 # 빌드 및 타입 검사
 npm run build
 
+# 실행 중 개발 서버(.next)를 덮지 않는 빌드 검증 (.next-buildcheck 사용)
+npm run build:check
+
 # ESLint 린트 검사
 npm run lint
 
 # 프로덕션 빌드 서버 기동
 npm start
 ```
+
+### 7.3. 개발 문서
+
+*   `AGENTS.md` / `CLAUDE.md`: 에이전트 공통 행동 규칙 및 작업 핸드오프 규칙
+*   `HARNESS.md`: 하네스 운용 흐름 및 검증 규칙
+*   `CONVENTIONS.md`: 프로젝트 스택·DB·도메인 규칙
+*   `feature_list/`: 도메인별 기능 스펙 및 검증 명세
+*   `TASK.json` / `docs/tasks/`: 현재 작업 지시 1건 및 지난 작업 기록
+*   `docs/research/`: 외부 API 등 기술 조사 문서
