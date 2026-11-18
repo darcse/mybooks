@@ -1,23 +1,23 @@
 {
-  "id": "T-012",
-  "goal": "도서·코믹스 목록 카드에서 도서명과 저자 사이 간격이 넉넉해지고, 저자 버튼의 클릭 영역이 커져서 누르기 쉬워진다.",
-  "context": "현재 src/app/books/_components/BookList.tsx(약 279~293줄)와 src/app/comics/_components/ComicsList.tsx(약 205~219줄)의 카드 텍스트 영역에서 제목 h3(className 'truncate text-sm font-medium text-ink') 바로 아래에 저자 button(className 'mb-2 block w-full truncate text-left text-xs text-mute hover:text-body')이 위쪽 간격 없이 붙어 있어 다닥다닥 보이고 클릭하기 어렵다. 기본안: 저자 버튼에 위쪽 간격과 세로 패딩을 준다(예: mt-1 py-1). 제목↔저자 글자 사이 간격이 눈에 띄게 늘어나고(약 8px 안팎) 버튼 높이(클릭 영역)가 늘어난다. 저자 아래 태그·날짜 영역과의 간격은 지금과 시각적으로 비슷하게 유지되도록 아래쪽 마진을 맞춘다(예: mb-2를 mb-1로, py-1의 아래 패딩 포함 기준). 도서와 코믹스는 같은 값을 쓴다. 저자가 없을 때 렌더되는 빈 <p>(기존 mb-2)는 그대로 둔다. 사진집 카드와 카드의 다른 간격·레이아웃은 건드리지 않는다. 정확한 클래스는 에이전트가 위 기준에 맞게 정한다. 스타일 규칙(CONVENTIONS.md): drop shadow 금지, accent 색 금지, 색상·글자 크기 변경 없음. 최소 수정, 전체 파일 재작성 금지.",
+  "id": "T-013",
+  "goal": "코믹스 목록 카드에도 도서 카드처럼 발매일이 표시된다.",
+  "context": "도서 카드(src/app/books/_components/BookList.tsx 약 340~342줄)는 태그 영역(카테고리·상태·소장 상태 버튼들) 아래, 별점 위에 {book.publish_date && (<p className=\"mt-1.5 text-xs text-mute\">{book.publish_date}</p>)}로 발매일을 표시한다. 코믹스 카드(src/app/comics/_components/ComicsList.tsx 약 222~249줄)는 태그 영역(카테고리·상태·포맷) 다음에 곧바로 별점({comic.rank > 0 && ...}) 표시가 이어지고 발매일 표시가 없다. Comic 타입(src/app/comics/types.ts)에 publish_date: string | null이 이미 있고, 코믹스 조회는 select('*')라서 데이터 변경은 필요 없다. 기본안: ComicsList.tsx의 태그 영역 div와 별점 사이에 도서 카드와 똑같은 마크업·클래스로 발매일을 추가한다(값이 없으면 표시하지 않는다). 형식은 DB에 저장된 값을 그대로 보여주는 도서 카드 방식과 같게 한다. 비로그인 성인 카드의 노출 정책은 바꾸지 않고, 도서 카드가 하는 것과 같은 조건으로만 표시한다(도서 카드에 성인 카드 예외가 없으면 코믹스도 두지 않는다). 최소 수정, 전체 파일 재작성 금지.",
   "scope": {
     "in": [
-      "BookList.tsx, ComicsList.tsx의 저자 버튼 className 간격 조정"
+      "ComicsList.tsx에 발매일 표시 추가"
     ],
     "out": [
-      "저자 클릭 동작·로직 변경 — 절대 건드리지 말 것",
-      "사진집 카드, 태그·날짜 영역, 카드 전체 레이아웃·색상·글자 크기 변경",
-      "문서·feature_list·DB, myaudio 전용 테이블·버킷",
+      "도서·사진집 카드와 코믹스 카드의 다른 UI·간격·클릭 동작 변경",
+      "데이터 조회 로직, DB 스키마·SQL",
+      "문서·feature_list 수정, myaudio 전용 테이블·버킷",
       "git add/commit/push"
     ]
   },
   "done": [
-    "도서·코믹스 카드에서 제목과 저자 사이 간격이 눈에 띄게 늘었고(약 8px 안팎) 저자 버튼의 클릭 영역 높이가 늘었다",
-    "저자 아래 태그·날짜와의 간격과 카드 전체 모양이 크게 달라지지 않고, 저자가 없는 카드와 사진집 카드는 변경이 없다",
-    "git diff가 두 파일의 저자 버튼 className 한 줄씩에 한정된다"
+    "코믹스 카드의 태그 영역 아래·별점 위에 발매일이 도서 카드와 같은 스타일로 표시되고, 발매일이 없는 코믹스에는 표시되지 않는다",
+    "도서 카드와 코믹스 카드의 다른 UI는 변경이 없고 git diff가 ComicsList.tsx 한 파일에 한정된다",
+    "npx tsc --noEmit과 npm run lint가 통과한다(에러 0)"
   ],
   "status": "done",
-  "result": "BookList·ComicsList 저자 버튼 className: mb-2 → mt-1 mb-1 py-1. 빈 저자 <p> 미변경. git diff 두 파일 className 한 줄씩."
+  "result": "ComicsList 태그·별점 사이에 publish_date 표시 추가(도서 카드와 동일 마크업). git diff ComicsList만 +3. tsc 통과, lint error 0."
 }

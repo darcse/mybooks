@@ -246,6 +246,9 @@ export function ComicsList({
                         {comic.format}
                       </span>
                     </div>
+                    {comic.publish_date && (
+                      <p className="mt-1.5 text-xs text-mute">{comic.publish_date}</p>
+                    )}
                     {comic.rank > 0 && (
                       <p className="mt-1.5 text-xs text-body">{'⭐'.repeat(comic.rank)}</p>
                     )}
