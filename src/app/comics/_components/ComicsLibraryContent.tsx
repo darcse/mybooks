@@ -170,7 +170,6 @@ export function ComicsLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
-    setRegisterPanelOpen(false);
     setSelectedComic({ isManual: true });
     setFormData(initialFormData);
   };
@@ -180,7 +179,6 @@ export function ComicsLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
-    setRegisterPanelOpen(false);
     setSelectedComic(item);
     const isbn = item.isbn ?? '';
     setFormData({
@@ -317,6 +315,7 @@ export function ComicsLibraryContent() {
       }
       setSelectedComic(null);
       handleClearSearch();
+      setRegisterPanelOpen(false);
       fetchLibrary();
     } catch (error) {
       toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');

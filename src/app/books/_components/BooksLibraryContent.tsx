@@ -233,7 +233,6 @@ export function BooksLibraryContent() {
       return;
     }
     clearEditParam();
-    setRegisterPanelOpen(false);
     setSelectedBook({ isManual: true });
     setFormData(initialFormData);
   };
@@ -244,7 +243,6 @@ export function BooksLibraryContent() {
       return;
     }
     clearEditParam();
-    setRegisterPanelOpen(false);
     setSelectedBook(book);
     const isbn = book.isbn ?? '';
     setFormData({
@@ -371,6 +369,7 @@ export function BooksLibraryContent() {
       setSelectedBook(null);
       clearEditParam();
       handleClearSearch();
+      setRegisterPanelOpen(false);
       fetchLibrary();
     } catch (error) {
       toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');

@@ -213,7 +213,6 @@ export function PhotobookLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
-    setRegisterPanelOpen(false);
     setSelectedPhotobook({ isManual: true });
     setFormData(initialFormData);
   };
@@ -223,7 +222,6 @@ export function PhotobookLibraryContent() {
       toast.error('로그인이 필요합니다.');
       return;
     }
-    setRegisterPanelOpen(false);
     setSelectedPhotobook(item);
     const isbn = item.isbn ?? '';
     setFormData({
@@ -348,6 +346,7 @@ export function PhotobookLibraryContent() {
       }
       setSelectedPhotobook(null);
       handleClearSearch();
+      setRegisterPanelOpen(false);
       fetchLibrary();
     } catch (error) {
       toast.error(isUnauthorizedError(error) ? '로그인이 필요합니다.' : '저장 중 오류가 발생했습니다.');
