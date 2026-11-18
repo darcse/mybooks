@@ -28,6 +28,7 @@ alwaysApply: true
 - feature 1개씩만 작업 — 범위 확장 금지
 - passes 변경은 Claude(플래너)만 한다 — Cursor는 건드리지 않는다
 - passes 변경 후 grep으로 실제 저장 여부 반드시 확인
+- `claude-progress.txt`·`Codex-progress.txt`는 레거시 파일이다 — 읽지도 갱신하지도 않는다. 작업 기록은 TASK.json의 result에만 남긴다
 - 개발 서버 보호 절을 따른다
 - 실행 중인 개발 서버가 쓰는 `.next`를 덮어쓰는 `npm run build`는 쓰지 않는다. Next 컴파일 검증은 `npm run build:check`만 사용한다
 - 전체 파일 재작성 금지 — 변경되는 부분만 최소 수정
