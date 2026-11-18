@@ -282,7 +282,7 @@ export function BookList({
                     {authorLabel ? (
                       <button
                         type="button"
-                        className="mb-2 block w-full truncate text-left text-xs text-mute hover:text-body"
+                        className="mt-1 mb-1 block w-full truncate py-1 text-left text-xs text-mute hover:text-body"
                         onClick={(e) => {
                           e.stopPropagation();
                           setListSearchQuery(authorLabel);

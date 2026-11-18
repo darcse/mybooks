@@ -1,28 +1,23 @@
 {
-  "id": "T-011",
-  "goal": "도서·코믹스 목록 카드에서 저자를 클릭하면, 사진집의 모델 클릭과 똑같이 해당 저자명으로 목록 검색이 걸린 결과 화면으로 전환된다.",
-  "context": "참조 구현(사진집): src/app/photobook/_components/PhotobookList.tsx 약 231~238줄에서 저자를 button(className 'block w-full truncate text-left text-xs text-mute hover:text-body')으로 렌더하고 onClick에서 onAuthorClick(author)를 호출한다. PhotobookLibraryContent.tsx의 handleAuthorClick은 setListSearchQuery(author)와 setListCurrentPage(1)을 한다. 사진집은 카드 정보 영역을 onClick stopPropagation으로 감싸 상세 모달이 열리지 않게 한다. 대상(도서): src/app/books/_components/BookList.tsx 약 281줄 <p className=\"mb-2 truncate text-xs text-mute\">{formatAuthorName(book.author)}</p>. 카드 컨테이너(약 245줄)에 onClick={() => onItemClick?.(book)}가 있어 상세 모달이 열리므로, 같은 파일의 상태 필터 버튼처럼 e.stopPropagation()을 쓴다(같은 파일에 stopPropagation + setListStatusFilter 패턴이 이미 있다). BookList는 setListSearchQuery를 이미 props로 받고 있다. 대상(코믹스): src/app/comics/_components/ComicsList.tsx 약 207~209줄 <p className=\"mb-2 truncate text-xs text-mute\">{formatComicAuthorName(comic.author)}</p>. 이 파일도 setListSearchQuery를 props로 받는다. 기본안: (1) 두 곳의 저자 <p>를 사진집과 같은 스타일의 button(type=button, 같은 className 계열, 기존 mb-2 간격 유지)으로 바꾸고, 클릭 시 e.stopPropagation() 후 검색어를 설정한다. 검색어는 카드에 표시된 저자 문자열(포맷 함수 결과) 그대로 쓴다. 포맷 함수 결과는 원본 author의 앞부분이라 기존 목록 검색(author.includes 비교)에 매칭된다. 공저처럼 긴 문자열도 표시된 그대로 검색어가 된다. (2) 저자 표시가 빈 문자열이면 button을 렌더하지 않고 기존처럼 빈 줄(높이 유지)이 되도록 한다. (3) 검색어가 바뀌면 페이지가 1로 돌아가야 한다. 각 LibraryContent에 이미 검색어 변경 시 페이지를 리셋하는 useEffect가 있는지 확인하고, 있으면 추가 호출은 필요 없고 없으면 리셋을 추가한다. (4) 비로그인 성인 카드(isAdultAndAnon)에서 현재 저자 표시 방식은 바꾸지 않는다. 노출 정책은 그대로 두고, 저자가 보이는 카드에서만 클릭이 동작하게 한다. 다른 필터(카테고리·상태·소장 등)는 사진집과 같이 그대로 유지된다. (5) props로 setListSearchQuery를 직접 호출하는 방식이 가장 작은 변경이다. 사진집처럼 onAuthorClick prop과 핸들러를 새로 만드는 쪽이 더 낫다고 판단하면 에이전트 재량이고 result에 이유를 적는다. 사진집 코드는 건드리지 않는다. 최소 수정, 전체 파일 재작성 금지, window.confirm/alert/prompt 금지.",
+  "id": "T-012",
+  "goal": "도서·코믹스 목록 카드에서 도서명과 저자 사이 간격이 넉넉해지고, 저자 버튼의 클릭 영역이 커져서 누르기 쉬워진다.",
+  "context": "현재 src/app/books/_components/BookList.tsx(약 279~293줄)와 src/app/comics/_components/ComicsList.tsx(약 205~219줄)의 카드 텍스트 영역에서 제목 h3(className 'truncate text-sm font-medium text-ink') 바로 아래에 저자 button(className 'mb-2 block w-full truncate text-left text-xs text-mute hover:text-body')이 위쪽 간격 없이 붙어 있어 다닥다닥 보이고 클릭하기 어렵다. 기본안: 저자 버튼에 위쪽 간격과 세로 패딩을 준다(예: mt-1 py-1). 제목↔저자 글자 사이 간격이 눈에 띄게 늘어나고(약 8px 안팎) 버튼 높이(클릭 영역)가 늘어난다. 저자 아래 태그·날짜 영역과의 간격은 지금과 시각적으로 비슷하게 유지되도록 아래쪽 마진을 맞춘다(예: mb-2를 mb-1로, py-1의 아래 패딩 포함 기준). 도서와 코믹스는 같은 값을 쓴다. 저자가 없을 때 렌더되는 빈 <p>(기존 mb-2)는 그대로 둔다. 사진집 카드와 카드의 다른 간격·레이아웃은 건드리지 않는다. 정확한 클래스는 에이전트가 위 기준에 맞게 정한다. 스타일 규칙(CONVENTIONS.md): drop shadow 금지, accent 색 금지, 색상·글자 크기 변경 없음. 최소 수정, 전체 파일 재작성 금지.",
   "scope": {
     "in": [
-      "BookList.tsx, ComicsList.tsx의 저자 표시를 클릭 가능한 버튼으로 변경",
-      "필요 시 각 LibraryContent.tsx의 핸들러·페이지 리셋 추가"
+      "BookList.tsx, ComicsList.tsx의 저자 버튼 className 간격 조정"
     ],
     "out": [
-      "사진집 코드(PhotobookList·PhotobookLibraryContent) 변경",
-      "목록 검색 필터 로직·정렬·카테고리/상태 필터 동작 변경",
-      "성인 비로그인 카드의 정보 노출 정책 변경",
-      "상세 모달·폼·등록 패널 등 카드 밖 UI",
-      "DB 스키마·SQL, README·CONVENTIONS·feature_list 수정, myaudio 전용 테이블·버킷",
+      "저자 클릭 동작·로직 변경 — 절대 건드리지 말 것",
+      "사진집 카드, 태그·날짜 영역, 카드 전체 레이아웃·색상·글자 크기 변경",
+      "문서·feature_list·DB, myaudio 전용 테이블·버킷",
       "git add/commit/push"
     ]
   },
   "done": [
-    "도서·코믹스 목록 카드의 저자를 클릭하면 목록 검색창에 그 저자 문자열이 들어가고 목록이 그 검색 결과로 필터링되며 1페이지로 이동한다",
-    "저자 클릭 시 카드의 상세 모달이 열리지 않고, 카드의 나머지 클릭(상세 열기, 카테고리·상태 필터 버튼)은 기존처럼 동작한다",
-    "저자가 없는 카드는 클릭 요소가 없고 카드 높이가 달라지지 않으며, 저자 버튼은 사진집과 같은 스타일(text-xs text-mute, hover 시 text-body)이다",
-    "git diff가 BookList·ComicsList(필요 시 LibraryContent)에 한정되고 사진집 코드는 변경이 없다",
-    "npx tsc --noEmit과 npm run lint가 통과한다(에러 0)"
+    "도서·코믹스 카드에서 제목과 저자 사이 간격이 눈에 띄게 늘었고(약 8px 안팎) 저자 버튼의 클릭 영역 높이가 늘었다",
+    "저자 아래 태그·날짜와의 간격과 카드 전체 모양이 크게 달라지지 않고, 저자가 없는 카드와 사진집 카드는 변경이 없다",
+    "git diff가 두 파일의 저자 버튼 className 한 줄씩에 한정된다"
   ],
   "status": "done",
-  "result": "BookList·ComicsList 저자 <p>를 button으로 교체. stopPropagation + setListSearchQuery(표시 문자열). 빈 저자는 mb-2 빈 <p> 유지. 페이지 리셋은 LibraryContent의 listSearchQuery useEffect가 이미 있어 추가 없음. onAuthorClick 미추가(기존 props로 충분). 사진집 미변경.\n검증: tsc 통과, lint error 0.\ngit diff: BookList + ComicsList 2 files only."
+  "result": "BookList·ComicsList 저자 버튼 className: mb-2 → mt-1 mb-1 py-1. 빈 저자 <p> 미변경. git diff 두 파일 className 한 줄씩."
 }
