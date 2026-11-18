@@ -88,7 +88,7 @@ alwaysApply: true
 
 - 브랜치 생성 금지 — 항상 main에 직접 커밋 & 푸시
 - PR 없음
-- 커밋·푸시는 JW가 한다. 에이전트는 git add/commit/push를 하지 않는다
+- 커밋은 플래너(Claude)가 JW 승인 범위 안에서 하고 보고한다. 푸시는 JW가 한다(Claude 실행 환경은 원격 접속이 막혀 있다). 구현 에이전트(Cursor 등)는 git add/commit/push를 하지 않는다
 
 ### 커밋 메시지 형식
 

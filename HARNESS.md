@@ -16,7 +16,7 @@
 ## 개발 흐름
 
 ```
-JW 요청 → Claude(플래너)가 TASK.json 작성 → Cursor 구현 → "확인해줘"로 Claude가 result·diff 검토 → JW 동작 확인 → Claude가 passes 변경 → JW 커밋·푸시
+JW 요청 → Claude(플래너)가 TASK.json 작성 → Cursor 구현 → "확인해줘"로 Claude가 result·diff 검토 → JW 동작 확인 → Claude가 passes 변경 → Claude 커밋 후 JW에게 보고 → JW 푸시
 ```
 
 1. **JW** — 요구사항을 말한다.
@@ -25,7 +25,8 @@ JW 요청 → Claude(플래너)가 TASK.json 작성 → Cursor 구현 → "확�
 4. **Claude(플래너)** — result와 git diff를 검토한다. scope 이탈, 중복·불필요한 복잡도, 죽은 코드를 본다.
 5. **JW** — 브라우저에서 동작을 직접 확인한다. (Playwright 사용 안 함)
 6. **Claude(플래너)** — 확인된 feature의 passes를 변경하고 파일을 다시 읽어 저장을 확인한다.
-7. **JW** — 직접 커밋하고 푸시한다. 에이전트는 git add/commit/push를 하지 않는다.
+7. **Claude(플래너)** — 확인된 작업을 커밋하고 JW에게 보고한다. 배포에 영향이 있으면(환경변수 등) 푸시 전에 알린다.
+8. **JW** — 푸시한다. (Claude 실행 환경은 원격 접속이 막혀 있어 푸시할 수 없다.) Cursor는 git add/commit/push를 하지 않는다.
 
 문제가 있으면 새 TASK.json(수정 작업)으로 넘긴다.
 
@@ -77,7 +78,7 @@ TASK.json의 done에 따른다. 로직이나 구조를 건드리는 작업은 �
 
 1. TASK.json의 status를 done으로, result에 변경 요약·건너뛴 항목과 이유·검증 결과·`git diff --stat` 요약을 기록한다.
 2. 테스트 루프 통과를 확인한다.
-3. 커밋·푸시는 JW가 한다.
+3. 커밋은 플래너(Claude)가, 푸시는 JW가 한다.
 
 ---
 
