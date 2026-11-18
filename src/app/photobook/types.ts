@@ -2,6 +2,7 @@ export interface Photobook {
   id: number;
   title: string;
   author: string | null;
+  model_name2?: string | null;
   publisher: string | null;
   publish_date: string | null;
   isbn: string | null;

@@ -23,6 +23,7 @@ export async function getBookDetailByIsbn(isbn: string) {
 interface PhotobookFormPayload {
   title: string;
   author: string;
+  model_name2: string;
   publisher: string;
   publish_date: string;
   isbn: string;
@@ -41,9 +42,11 @@ interface PhotobookFormPayload {
 }
 
 function buildPhotobookRow(bookData: PhotobookFormPayload) {
+  const modelName2 = bookData.model_name2.trim();
   return {
     title: bookData.title.replace(/<\/?[^>]+(>|$)/g, ''),
     author: bookData.author,
+    model_name2: modelName2 ? modelName2 : null,
     publisher: bookData.publisher,
     publish_date: formatPubDate(bookData.publish_date),
     isbn: bookData.isbn,

@@ -9,6 +9,7 @@ import type { SelectedPhotobook } from '../types';
 interface FormData {
   title: string;
   author: string;
+  model_name2: string;
   publisher: string;
   publish_date: string;
   isbn: string;
@@ -68,7 +69,8 @@ export function PhotobookForm({
     label: string,
     field: keyof FormData,
     apiField?: string,
-    type: string = 'text'
+    type: string = 'text',
+    placeholder?: string
   ) => {
     const isReadOnly =
       apiField &&
@@ -85,6 +87,7 @@ export function PhotobookForm({
           value={typeof formData[field] === 'boolean' ? '' : (formData[field] ?? '')}
           onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
           readOnly={!!isReadOnly}
+          placeholder={placeholder}
         />
       </div>
     );
@@ -115,7 +118,10 @@ export function PhotobookForm({
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           {renderInput('제목', 'title', 'title')}
-          {renderInput('모델', 'author', 'author')}
+          <div className="space-y-4">
+            {renderInput('모델', 'author', 'author')}
+            {renderInput('모델명2', 'model_name2', undefined, 'text', '영문명 등 (검색용)')}
+          </div>
           {renderInput('출판사', 'publisher', 'publisher')}
           {renderInput('발매일', 'publish_date', 'pubdate')}
           {renderInput('ISBN', 'isbn', 'isbn')}

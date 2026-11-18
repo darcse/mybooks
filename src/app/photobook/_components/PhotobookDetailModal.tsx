@@ -101,6 +101,11 @@ export function PhotobookDetailModal({
             <p>
               <strong className="text-ink">모델:</strong> {viewingPhotobook.author || '-'}
             </p>
+            {viewingPhotobook.model_name2?.trim() ? (
+              <p>
+                <strong className="text-ink">모델명2:</strong> {viewingPhotobook.model_name2}
+              </p>
+            ) : null}
             <p>
               <strong className="text-ink">출판사:</strong> {viewingPhotobook.publisher || '-'}
             </p>

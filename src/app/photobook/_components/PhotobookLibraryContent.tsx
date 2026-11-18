@@ -36,6 +36,7 @@ const inputBaseClass =
 const initialFormData = {
   title: '',
   author: '',
+  model_name2: '',
   publisher: '',
   publish_date: '',
   isbn: '',
@@ -57,6 +58,7 @@ function photobookToFormData(book: Photobook) {
   return {
     title: book.title || '',
     author: book.author || '',
+    model_name2: book.model_name2 || '',
     publisher: book.publisher || '',
     publish_date: book.publish_date || '',
     isbn: book.isbn || '',
@@ -223,6 +225,7 @@ export function PhotobookLibraryContent() {
     setFormData({
       title: item.title?.replace(/<\/?[^>]+(>|$)/g, '') || '',
       author: item.author || '',
+      model_name2: '',
       publisher: item.publisher || '',
       publish_date: item.pubdate || '',
       isbn,
@@ -359,7 +362,8 @@ export function PhotobookLibraryContent() {
         const matchesSearch =
           !lowerQuery ||
           (book.title && book.title.toLowerCase().includes(lowerQuery)) ||
-          (book.author && book.author.toLowerCase().includes(lowerQuery));
+          (book.author && book.author.toLowerCase().includes(lowerQuery)) ||
+          (!!book.model_name2 && book.model_name2.toLowerCase().includes(lowerQuery));
         return matchesCategory && matchesRank && matchesSearch;
       }),
     [library, listSearchQuery, listCategoryFilter, listRankFilter]
