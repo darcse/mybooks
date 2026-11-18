@@ -178,6 +178,7 @@ export function ComicsList({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {paginatedLibrary.map((comic) => {
               const isAdultAndAnon = comic.is_adult && !isAuthenticated;
+              const authorLabel = formatComicAuthorName(comic.author);
               return (
                 <div
                   key={comic.id}
@@ -204,9 +205,20 @@ export function ComicsList({
                       className="truncate text-sm font-medium text-ink"
                       dangerouslySetInnerHTML={{ __html: comic.title }}
                     />
-                    <p className="mb-2 truncate text-xs text-mute">
-                      {formatComicAuthorName(comic.author)}
-                    </p>
+                    {authorLabel ? (
+                      <button
+                        type="button"
+                        className="mb-2 block w-full truncate text-left text-xs text-mute hover:text-body"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setListSearchQuery(authorLabel);
+                        }}
+                      >
+                        {authorLabel}
+                      </button>
+                    ) : (
+                      <p className="mb-2 truncate text-xs text-mute" />
+                    )}
                     <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                       <button
                         type="button"

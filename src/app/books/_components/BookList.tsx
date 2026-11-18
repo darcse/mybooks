@@ -240,6 +240,7 @@ export function BookList({
               const isAdultAndAnon = book.is_adult && !isAuthenticated;
               const showReadingIcon = READING_STATUS_FOR_ICON.has(book.status);
               const statusFilterValue = book.status === '컬렉션' ? 'Collection' : book.status;
+              const authorLabel = formatAuthorName(book.author);
               return (
                 <div
                   key={book.id}
@@ -278,7 +279,20 @@ export function BookList({
                       className="truncate text-sm font-medium text-ink"
                       dangerouslySetInnerHTML={{ __html: book.title }}
                     />
-                    <p className="mb-2 truncate text-xs text-mute">{formatAuthorName(book.author)}</p>
+                    {authorLabel ? (
+                      <button
+                        type="button"
+                        className="mb-2 block w-full truncate text-left text-xs text-mute hover:text-body"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setListSearchQuery(authorLabel);
+                        }}
+                      >
+                        {authorLabel}
+                      </button>
+                    ) : (
+                      <p className="mb-2 truncate text-xs text-mute" />
+                    )}
                     <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                       <button
                         type="button"
