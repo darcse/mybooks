@@ -215,5 +215,6 @@ mybooks는 Raycast 마케팅 사이트 디자인 언어를 기반으로 하되, 
 
 mybooks Archive는 아래 항목만 집계한다:
 - 완독 도서 (`books.status = '완독'`)
-- 코믹스 등록
 - 포토북 등록
+
+코믹스는 Archive와 월간 리뷰 코멘트에서 집계하지 않는다(의도적 제외).
