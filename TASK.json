@@ -21,6 +21,6 @@
     "InlineDeleteConfirm의 기존 variant(icon, footer) 출력과 기존 호출부 코드가 변경되지 않았다(git diff로 확인)",
     "npx tsc --noEmit과 npm run lint가 통과한다(에러 0)"
   ],
-  "status": "todo",
-  "result": ""
+  "status": "done",
+  "result": "변경: InlineDeleteConfirm에 variant='compact'(아이콘+라벨 px-2 py-1 text-xs)와 triggerLabel prop 추가. BookHighlightsPageContent AI 해설 삭제 버튼을 InlineDeleteConfirm(compact)로 교체, 헤더를 flex-wrap으로 조정. handleClearExplanation·API·기존 icon/footer 호출부는 미변경.\n검증: npx tsc --noEmit 통과, npm run lint error 0 / warning 18(기존).\ngit diff --stat: InlineDeleteConfirm.tsx + BookHighlightsPageContent.tsx 2 files, +36/-16. 기존 호출부 파일 diff 없음."
 }

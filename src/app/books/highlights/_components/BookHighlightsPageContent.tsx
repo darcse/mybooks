@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, ChevronUp, Pencil, Plus, RefreshCw, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronUp, Pencil, Plus, RefreshCw, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { InlineDeleteConfirm } from '@/components/InlineDeleteConfirm';
 import { createClient } from '@/lib/supabase/client';
@@ -879,9 +879,9 @@ export function BookHighlightsPageContent({
                       ) : null}
                       {item.ai_explanation?.trim() ? (
                         <div className="mt-4 rounded-sm border border-hairline bg-surface px-4 py-3">
-                          <div className="mb-2 flex items-center justify-between gap-2">
+                          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                             <p className="text-xs font-medium text-mute">AI 해설</p>
-                            <div className="flex shrink-0 items-center gap-1.5">
+                            <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => handleGenerateExplanation(item, true)}
@@ -898,19 +898,18 @@ export function BookHighlightsPageContent({
                                 />
                                 {explainingId === item.id ? '생성 중…' : '재생성'}
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleClearExplanation(item)}
-                                disabled={
-                                  explainingId === item.id || clearingExplanationId === item.id
+                              <InlineDeleteConfirm
+                                key={`explanation-delete-${item.id}`}
+                                variant="compact"
+                                message={
+                                  'AI 해설을 삭제하시겠습니까?\n삭제 후 다시 생성할 수 있습니다.'
                                 }
-                                className="inline-flex items-center gap-1 rounded-md border border-hairline px-2 py-1 text-xs font-medium text-body hover:text-ink disabled:opacity-50"
-                                aria-label="AI 해설 삭제"
+                                onConfirm={() => handleClearExplanation(item)}
+                                isBusy={clearingExplanationId === item.id}
+                                disabled={explainingId === item.id}
+                                ariaLabel="AI 해설 삭제"
                                 title="해설 삭제"
-                              >
-                                <Trash2 className="size-3.5" strokeWidth={1.8} />
-                                {clearingExplanationId === item.id ? '삭제 중…' : '삭제'}
-                              </button>
+                              />
                             </div>
                           </div>
                           <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">
